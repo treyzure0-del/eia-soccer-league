@@ -1,0 +1,1479 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>School Soccer League</title>
+  <script src=".html1.dat"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            bg: '#050816',
+            surface: '#0b1020',
+            border: '#1f2937',
+            text: '#f9fafb',
+            muted: '#9ca3af',
+            primary: '#2563eb',
+            primarySoft: '#1d4ed8',
+            win: '#22c55e',
+            draw: '#eab308',
+            loss: '#ef4444',
+          },
+          fontFamily: {
+            heading: ['system-ui', 'sans-serif'],
+            body: ['system-ui', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <link href="flowbite.min.css" rel="stylesheet" />
+</head>
+<body class="min-h-screen bg-slate-950 text-gray-100 font-body transition-colors duration-300 relative">
+  <!-- Background media layer -->
+  <div id="bg-media-container" class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <img id="bg-image" src="" alt="League background" class="hidden w-full h-full object-cover" />
+    <video id="bg-video" class="hidden w-full h-full object-cover" autoplay muted loop playsinline></video>
+    <div id="bg-overlay" class="absolute inset-0 bg-black/60"></div>
+  </div>
+
+  <header class="border-b border-slate-800 bg-slate-950/80 sticky top-0 z-30 backdrop-blur">
+    <nav class="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
+      <div class="flex items-center gap-2">
+        <div id="site-logo-circle" class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-xs font-semibold tracking-tight overflow-hidden">
+          <span id="site-logo-initials">SL</span>
+          <img id="site-logo-image" src="" alt="League logo" class="hidden w-full h-full object-cover" />
+        </div>
+        <div>
+          <h1 id="site-title" class="text-lg font-semibold font-heading leading-tight">School Soccer League</h1>
+          <p id="site-subtitle" class="text-xs text-muted">Premier-style standings for our school</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="nav-table" class="text-xs md:text-sm px-3 py-1.5 rounded-full border border-transparent text-muted hover:text-gray-100 hover:border-slate-600 transition-colors">Table</button>
+        <button id="nav-matches" class="text-xs md:text-sm px-3 py-1.5 rounded-full border border-transparent text-muted hover:text-gray-100 hover:border-slate-600 transition-colors">Matches</button>
+        <button id="nav-players" class="text-xs md:text-sm px-3 py-1.5 rounded-full border border-transparent text-muted hover:text-gray-100 hover:border-slate-600 transition-colors">Teams & Players</button>
+        <button id="admin-login-btn" class="text-sm px-3 py-1.5 rounded-full border border-slate-700 hover:border-primary hover:text-primary transition-colors">Admin</button>
+        <button id="logout-btn" class="hidden text-sm px-3 py-1.5 rounded-full border border-slate-700 hover:border-red-500 hover:text-red-400 transition-colors">Logout</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-6 space-y-6 relative z-10">
+    <!-- League Table Section -->
+    <section id="section-table" class="space-y-6">
+      <section class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h2 class="text-2xl md:text-3xl font-bold font-heading tracking-tight">League Table</h2>
+          <p class="text-sm text-muted mt-1">Live standings for the current school season. Updated by league admins.</p>
+        </div>
+        <div class="flex flex-wrap gap-3 text-xs text-muted">
+          <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-win"></span><span>Win</span></div>
+          <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-draw"></span><span>Draw</span></div>
+          <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-loss"></span><span>Loss</span></div>
+        </div>
+      </section>
+
+      <section class="bg-surface/60 border border-slate-800 rounded-2xl shadow-lg shadow-slate-900/40 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead class="bg-slate-900/80">
+              <tr class="text-xs uppercase tracking-wider text-muted">
+                <th class="px-3 py-3 text-left">Pos</th>
+                <th class="px-3 py-3 text-left">Team</th>
+                <th class="px-2 py-3 text-center">P</th>
+                <th class="px-2 py-3 text-center">W</th>
+                <th class="px-2 py-3 text-center">D</th>
+                <th class="px-2 py-3 text-center">L</th>
+                <th class="px-2 py-3 text-center">GF</th>
+                <th class="px-2 py-3 text-center">GA</th>
+                <th class="px-2 py-3 text-center">GD</th>
+                <th class="px-2 py-3 text-center">Pts</th>
+                <th class="px-3 py-3 text-center">Last 5</th>
+              </tr>
+            </thead>
+            <tbody id="league-table-body" class="divide-y divide-slate-800"></tbody>
+          </table>
+        </div>
+        <div id="table-empty-state" class="hidden px-4 py-6 text-center text-sm text-muted border-t border-slate-800">
+          No teams yet. Once an admin adds teams, they will appear here.
+        </div>
+        <div id="table-loading" class="px-4 py-3 text-xs text-muted border-t border-slate-800">Loading standings…</div>
+        <div id="table-error" class="hidden px-4 py-3 text-xs text-red-400 border-t border-slate-800"></div>
+      </section>
+
+      <!-- Announcements (public) -->
+      <section id="section-announcements" class="space-y-3">
+        <div class="flex items-center justify-between gap-2">
+          <h2 class="text-xl font-bold font-heading tracking-tight">Announcements</h2>
+        </div>
+        <section class="bg-surface/60 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <div id="announcements-list" class="space-y-3 text-xs"></div>
+          <div id="announcements-empty" class="hidden text-xs text-muted">
+            No announcements yet.
+          </div>
+        </section>
+      </section>
+    </section>
+
+    <!-- Matches Section -->
+    <section id="section-matches" class="space-y-4 hidden">
+      <div class="flex items-center justify-between gap-2">
+        <h2 class="text-xl md:text-2xl font-bold font-heading tracking-tight">Matches</h2>
+        <p class="text-xs text-muted">Upcoming and recent fixtures.</p>
+      </div>
+      <section class="bg-surface/60 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <h3 class="text-sm font-semibold uppercase tracking-wide text-muted">Fixtures & Results</h3>
+        <div id="matches-list" class="space-y-2 text-xs"></div>
+        <div id="matches-empty" class="hidden text-xs text-muted">No matches yet.</div>
+      </section>
+    </section>
+
+    <!-- Teams & Players Section -->
+    <section id="section-players" class="space-y-4 hidden">
+      <div class="flex items-center justify-between gap-2">
+        <h2 class="text-xl md:text-2xl font-bold font-heading tracking-tight">Teams & Players</h2>
+        <p class="text-xs text-muted">Browse squads and player information.</p>
+      </div>
+      <section class="bg-surface/60 border border-slate-800 rounded-2xl p-4 space-y-4">
+        <div id="teams-players-list" class="space-y-3 text-xs"></div>
+        <div id="teams-players-empty" class="hidden text-xs text-muted">No teams yet.</div>
+      </section>
+    </section>
+
+    <!-- Admin Panel -->
+    <section id="admin-panel" class="hidden space-y-6">
+      <div class="flex items-center justify-between gap-2">
+        <h3 class="text-xl font-semibold font-heading">Admin Panel</h3>
+        <p class="text-xs text-muted">Only visible to logged-in admins. Students can't see this section.</p>
+      </div>
+
+      <!-- Site settings -->
+      <div class="bg-surface/60 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-muted">Site Settings</h4>
+        <form id="site-settings-form" class="space-y-3">
+          <div class="grid md:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs mb-1" for="site-title-input">Site Title</label>
+              <input id="site-title-input" type="text" class="w-full rounded-lg bg-slate-900 border border-slate-700 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="School Soccer League" />
+            </div>
+            <div>
+              <label class="block text-xs mb-1" for="site-subtitle-input">Subtitle</label>
+              <input id="site-subtitle-input" type="text" class="w-full rounded-lg bg-slate-900 border border-slate-700 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Premier-style standings for our school" />
+            </div>
+          </div>
+          <div class="flex flex-col md:flex-row md:items-center gap-3">
+            <div class="flex-1">
+              <label class="block text-xs mb-1" for="site-logo-input">League Logo</label>
+              <input id="site-logo-input" type="file" accept="image/*" class="block w-full text-xs text-muted file:text-xs file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-slate-800 file:text-gray-100 hover:file:bg-slate-700" />
+            </div>
+          </div>
+
+          <!-- Background media settings -->
+          <div class="border-t border-slate-800 pt-3 mt-2 space-y-2">
+            <h5 class="text-xs font-semibold uppercase tracking-wide text-muted">Background Media</h5>
+            <div class="grid md:grid-cols-3 gap-3 text-xs">
+              <div>
+                <label class="block mb-1" for="bg-media-type">Type</label>
+                <select id="bg-media-type" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5">
+                  <option value="none">None</option>
+                  <option value="image">Image (static)</option>
+                  <option value="video">Video (looping)</option>
+                </select>
+              </div>
+              <div class="md:col-span-2">
+                <label class="block mb-1" for="bg-media-file">Background File</label>
+                <input id="bg-media-file" type="file" accept="image/*,video/*" class="block w-full text-xs text-muted file:text-xs file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-slate-800 file:text-gray-100 hover:file:bg-slate-700" />
+                <p class="text-[11px] text-muted mt-1">Upload an image or video. Large files may impact loading speed.</p>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="inline-flex items-center justify-center rounded-full bg-primary px-4 py-1.5 text-xs font-medium hover:bg-primarySoft transition-colors">Save Site Settings</button>
+          <p id="site-settings-message" class="text-xs mt-1 text-muted"></p>
+        </form>
+      </div>
+
+      <!-- Announcements management -->
+      <div class="bg-surface/60 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-muted">Announcements</h4>
+        <form id="announcement-form" class="space-y-3">
+          <input type="hidden" id="announcement-id" />
+          <div>
+            <label class="block text-xs mb-1" for="announcement-title">Title</label>
+            <input id="announcement-title" type="text"
+                   class="w-full rounded-lg bg-slate-900 border border-slate-700 text-sm px-3 py-2
+                          focus:outline-none focus:ring-2 focus:ring-primary" />
+          </div>
+          <div>
+            <label class="block text-xs mb-1" for="announcement-message">Message</label>
+            <textarea id="announcement-message" rows="3"
+                      class="w-full rounded-lg bg-slate-900 border border-slate-700 text-xs px-3 py-2
+                             focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
+          </div>
+          <div class="flex items-center justify-between gap-2 pt-1">
+            <div class="flex items-center gap-2">
+              <button type="submit"
+                class="inline-flex items-center justify-center rounded-full bg-primary px-4 py-1.5
+                       text-xs font-medium hover:bg-primarySoft transition-colors">
+                Save Announcement
+              </button>
+              <button type="button" id="announcement-delete-btn"
+                class="hidden inline-flex items-center justify-center rounded-full border border-red-500
+                       text-red-400 px-3 py-1.5 text-xs hover:bg-red-500/10 transition-colors">
+                Delete
+              </button>
+            </div>
+            <button type="button" id="announcement-reset-btn"
+              class="text-xs text-muted hover:text-gray-300">
+              Clear
+            </button>
+          </div>
+          <p id="announcement-form-message" class="text-xs mt-1 text-muted"></p>
+        </form>
+
+        <div class="border-t border-slate-800 pt-3 mt-2 space-y-2">
+          <div class="flex items-center justify-between">
+            <h5 class="text-xs font-semibold uppercase tracking-wide text-muted">Existing Announcements</h5>
+            <p class="text-[11px] text-muted">Tap to edit.</p>
+          </div>
+          <div id="admin-announcements-list" class="space-y-1 max-h-48 overflow-y-auto text-xs"></div>
+        </div>
+      </div>
+
+      <!-- Team management -->
+      <div class="grid gap-4 md:grid-cols-2">
+        <div class="bg-surface/60 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <h4 class="text-sm font-semibold uppercase tracking-wide text-muted">Add / Edit Team</h4>
+          <form id="team-form" class="space-y-3">
+            <input type="hidden" id="team-id" />
+            <div>
+              <label class="block text-xs mb-1" for="team-name">Team Name</label>
+              <input id="team-name" type="text" required class="w-full rounded-lg bg-slate-900 border border-slate-700 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
+            </div>
+            <div>
+              <label class="block text-xs mb-1" for="team-logo-file">Team Logo</label>
+              <input id="team-logo-file" type="file" accept="image/*" class="block w-full text-xs text-muted file:text-xs file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-slate-800 file:text-gray-100 hover:file:bg-slate-700" />
+              <p class="text-[11px] text-muted mt-1">Leave empty to keep the current logo.</p>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-xs">
+              <div>
+                <label class="block mb-1" for="team-played">P</label>
+                <input id="team-played" type="number" min="0" value="0" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5" />
+              </div>
+              <div>
+                <label class="block mb-1" for="team-wins">W</label>
+                <input id="team-wins" type="number" min="0" value="0" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5" />
+              </div>
+              <div>
+                <label class="block mb-1" for="team-draws">D</label>
+                <input id="team-draws" type="number" min="0" value="0" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5" />
+              </div>
+              <div>
+                <label class="block mb-1" for="team-losses">L</label>
+                <input id="team-losses" type="number" min="0" value="0" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5" />
+              </div>
+              <div>
+                <label class="block mb-1" for="team-gf">GF</label>
+                <input id="team-gf" type="number" min="0" value="0" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5" />
+              </div>
+              <div>
+                <label class="block mb-1" for="team-ga">GA</label>
+                <input id="team-ga" type="number" min="0" value="0" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5" />
+              </div>
+              <div>
+                <label class="block mb-1" for="team-pts">Pts</label>
+                <input id="team-pts" type="number" min="0" value="0" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs mb-1" for="team-last5">Last 5 (e.g. W,W,D,L,W)</label>
+              <input id="team-last5" type="text" placeholder="Comma-separated W/D/L" class="w-full rounded-lg bg-slate-900 border border-slate-700 text-xs px-3 py-2" />
+            </div>
+            <div class="flex items-center justify-between gap-2 pt-1">
+              <div class="flex items-center gap-2">
+                <button type="submit" class="inline-flex items-center justify-center rounded-full bg-primary px-4 py-1.5 text-xs font-medium hover:bg-primarySoft transition-colors">Save Team</button>
+                <button type="button" id="team-delete-btn" class="hidden inline-flex items-center justify-center rounded-full border border-red-500 text-red-400 px-3 py-1.5 text-xs hover:bg-red-500/10 transition-colors">Delete</button>
+              </div>
+              <button type="button" id="team-reset-btn" class="text-xs text-muted hover:text-gray-300">Clear</button>
+            </div>
+            <p id="team-form-message" class="text-xs mt-1 text-muted"></p>
+          </form>
+        </div>
+
+        <div class="bg-surface/60 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="text-sm font-semibold uppercase tracking-wide text-muted">Teams</h4>
+            <p class="text-[11px] text-muted">Tap a team row to edit.</p>
+          </div>
+          <div id="admin-teams-list" class="space-y-1 max-h-72 overflow-y-auto text-xs"></div>
+        </div>
+      </div>
+
+      <!-- Match management -->
+      <div class="bg-surface/60 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-muted">Add / Edit Match</h4>
+        <form id="match-form" class="space-y-3">
+          <input type="hidden" id="match-id" />
+          <div class="grid md:grid-cols-2 gap-3 text-xs">
+            <div>
+              <label class="block mb-1" for="match-home">Home Team</label>
+              <select id="match-home" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5"></select>
+            </div>
+            <div>
+              <label class="block mb-1" for="match-away">Away Team</label>
+              <select id="match-away" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5"></select>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-3 text-xs">
+            <div>
+              <label class="block mb-1" for="match-home-goals">Home Goals</label>
+              <input id="match-home-goals" type="number" min="0" value="0" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5" />
+            </div>
+            <div>
+              <label class="block mb-1" for="match-away-goals">Away Goals</label>
+              <input id="match-away-goals" type="number" min="0" value="0" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5" />
+            </div>
+            <div>
+              <label class="block mb-1" for="match-date">Date</label>
+              <input id="match-date" type="date" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5" />
+            </div>
+          </div>
+          <div class="grid md:grid-cols-3 gap-3 text-xs">
+            <div>
+              <label class="block mb-1" for="match-status">Status</label>
+              <select id="match-status" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5">
+                <option value="upcoming">Upcoming</option>
+                <option value="finished">Finished</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex items-center justify-between gap-2 pt-1">
+            <div class="flex items-center gap-2">
+              <button type="submit" class="inline-flex items-center justify-center rounded-full bg-primary px-4 py-1.5 text-xs font-medium hover:bg-primarySoft transition-colors">Save Match</button>
+              <button type="button" id="match-delete-btn" class="hidden inline-flex items-center justify-center rounded-full border border-red-500 text-red-400 px-3 py-1.5 text-xs hover:bg-red-500/10 transition-colors">Delete</button>
+            </div>
+            <button type="button" id="match-reset-btn" class="text-xs text-muted hover:text-gray-300">Clear</button>
+          </div>
+          <p id="match-form-message" class="text-xs mt-1 text-muted"></p>
+        </form>
+      </div>
+
+      <!-- Player management -->
+      <div class="bg-surface/60 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-muted">Add / Edit Player</h4>
+        <form id="player-form" class="space-y-3">
+          <input type="hidden" id="player-id" />
+          <div class="grid md:grid-cols-3 gap-3 text-xs">
+            <div>
+              <label class="block mb-1" for="player-name">Player Name</label>
+              <input id="player-name" type="text" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5" />
+            </div>
+            <div>
+              <label class="block mb-1" for="player-number">Number</label>
+              <input id="player-number" type="number" min="0" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5" />
+            </div>
+            <div>
+              <label class="block mb-1" for="player-position">Position</label>
+              <input id="player-position" type="text" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5" placeholder="e.g. Forward" />
+            </div>
+          </div>
+          <div class="text-xs">
+            <label class="block mb-1" for="player-team">Team</label>
+            <select id="player-team" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5"></select>
+          </div>
+          <div class="flex items-center justify-between gap-2 pt-1">
+            <div class="flex items-center gap-2">
+              <button type="submit" class="inline-flex items-center justify-center rounded-full bg-primary px-4 py-1.5 text-xs font-medium hover:bg-primarySoft transition-colors">Save Player</button>
+              <button type="button" id="player-delete-btn" class="hidden inline-flex items-center justify-center rounded-full border border-red-500 text-red-400 px-3 py-1.5 text-xs hover:bg-red-500/10 transition-colors">Delete</button>
+            </div>
+            <button type="button" id="player-reset-btn" class="text-xs text-muted hover:text-gray-300">Clear</button>
+          </div>
+          <p id="player-form-message" class="text-xs mt-1 text-muted"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Theme Toggle Button (bottom-right, on all pages) -->
+  <button id="theme-toggle" class="fixed bottom-4 right-4 z-40 inline-flex items-center gap-1 rounded-full border border-slate-700 bg-slate-900/80 px-3 py-1.5 text-xs text-muted hover:border-primary hover:text-gray-100 shadow-lg shadow-black/40 backdrop-blur transition-colors" type="button" aria-label="Toggle dark mode">
+    <span id="theme-toggle-icon">🌙</span>
+    <span id="theme-toggle-label">Dark</span>
+  </button>
+
+  <!-- Admin Login Modal -->
+  <div id="admin-login-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-40 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black/60">
+    <div class="relative p-4 w-full max-w-sm max-h-full">
+      <div class="relative bg-surface/90 rounded-2xl shadow border border-slate-800">
+        <button type="button" id="close-login-modal" class="absolute top-3 right-3 text-slate-500 hover:text-gray-200 text-sm">✕</button>
+        <div class="p-5 space-y-4">
+          <div>
+            <h3 class="text-lg font-semibold leading-tight">Admin Login</h3>
+            <p class="text-xs text-muted mt-1">Only league administrators should log in here.</p>
+          </div>
+          <form id="login-form" class="space-y-3">
+            <div>
+              <label class="block text-xs mb-1" for="login-username">Username</label>
+              <input id="login-username" type="text" required class="w-full rounded-lg bg-slate-900 border border-slate-700 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
+            </div>
+            <div>
+              <label class="block text-xs mb-1" for="login-password">Password</label>
+              <input id="login-password" type="password" required class="w-full rounded-lg bg-slate-900 border border-slate-700 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
+            </div>
+            <button type="submit" class="w-full inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium hover:bg-primarySoft transition-colors">
+              Log In
+            </button>
+            <p id="login-message" class="text-xs text-muted mt-1"></p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="parse.min.js"></script>
+  <script>
+    Parse.initialize('6M8ibNOLPRIUzUixE1M5Krys1Bl5aKf8isZj1x2X', 'PcVwkrhcXvRACmtKzTRt8tsCf8mEuzPNXwD9zenq');
+    Parse.serverURL = 'https://parseapi.back4app.com/';
+
+    const Team = Parse.Object.extend('Team');
+    const Config = Parse.Object.extend('Config');
+    const Match = Parse.Object.extend('Match');
+    const Player = Parse.Object.extend('Player');
+    const Announcement = Parse.Object.extend('Announcement');
+
+    function parseLast5(str) {
+      if (!str) return [];
+      return str.split(',').map(s => s.trim().toUpperCase()).filter(v => v === 'W' || v === 'D' || v === 'L').slice(0, 5);
+    }
+
+    function renderLast5(codes) {
+      const colors = { W: 'bg-win', D: 'bg-draw', L: 'bg-loss' };
+      return codes.map((code) => `<span aria-label="${code === 'W' ? 'Win' : code === 'D' ? 'Draw' : 'Loss'}" class="w-2.5 h-2.5 rounded-full ${colors[code]} inline-block mr-1"></span>`).join('');
+    }
+
+    function applyBackgroundFromConfig(config) {
+      const type = config?.get('bgMediaType') || 'none';
+      const file = config?.get('bgMediaFile');
+      const imgEl = document.getElementById('bg-image');
+      const videoEl = document.getElementById('bg-video');
+
+      imgEl.classList.add('hidden');
+      videoEl.classList.add('hidden');
+      imgEl.src = '';
+      videoEl.src = '';
+
+      if (!file || type === 'none') return;
+
+      const url = file.url();
+      if (type === 'image') {
+        imgEl.src = url;
+        imgEl.classList.remove('hidden');
+      } else if (type === 'video') {
+        videoEl.src = url;
+        videoEl.classList.remove('hidden');
+      }
+    }
+
+    function applySiteConfig(config) {
+      const titleEl = document.getElementById('site-title');
+      const subtitleEl = document.getElementById('site-subtitle');
+      const logoInitials = document.getElementById('site-logo-initials');
+      const logoImg = document.getElementById('site-logo-image');
+
+      const title = config?.get('siteTitle') || 'School Soccer League';
+      const subtitle = config?.get('siteSubtitle') || 'Premier-style standings for our school';
+
+      titleEl.textContent = title;
+      subtitleEl.textContent = subtitle;
+
+      const logoFile = config?.get('siteLogo');
+      if (logoFile) {
+        logoImg.src = logoFile.url();
+        logoImg.classList.remove('hidden');
+        logoInitials.classList.add('hidden');
+      } else {
+        logoImg.src = '';
+        logoImg.classList.add('hidden');
+        logoInitials.classList.remove('hidden');
+      }
+
+      const titleInput = document.getElementById('site-title-input');
+      const subtitleInput = document.getElementById('site-subtitle-input');
+      const bgTypeSelect = document.getElementById('bg-media-type');
+      if (titleInput) titleInput.value = title;
+      if (subtitleInput) subtitleInput.value = subtitle;
+      if (bgTypeSelect && config?.get('bgMediaType')) {
+        bgTypeSelect.value = config.get('bgMediaType');
+      }
+
+      applyBackgroundFromConfig(config);
+    }
+
+    async function loadSiteConfig() {
+      try {
+        const query = new Parse.Query(Config);
+        const result = await query.first();
+        if (result) {
+          applySiteConfig(result);
+          window.__siteConfigId = result.id;
+        } else {
+          applySiteConfig(null);
+        }
+      } catch (err) {
+        console.error('Error loading site config', err);
+      }
+    }
+
+    async function saveSiteSettings(event) {
+      event.preventDefault();
+      const msg = document.getElementById('site-settings-message');
+      msg.textContent = 'Saving…';
+
+      const title = document.getElementById('site-title-input').value.trim();
+      const subtitle = document.getElementById('site-subtitle-input').value.trim();
+      const logoInput = document.getElementById('site-logo-input');
+      const logoFile = logoInput.files[0];
+      const bgType = document.getElementById('bg-media-type').value;
+      const bgFileInput = document.getElementById('bg-media-file');
+      const bgFileRaw = bgFileInput.files[0];
+
+      try {
+        let configObj;
+        if (window.__siteConfigId) {
+          const query = new Parse.Query(Config);
+          configObj = await query.get(window.__siteConfigId);
+        } else {
+          configObj = new Config();
+        }
+
+        if (title) configObj.set('siteTitle', title);
+        if (subtitle) configObj.set('siteSubtitle', subtitle);
+
+        if (logoFile) {
+          const logoParseFile = new Parse.File(logoFile.name, logoFile);
+          await logoParseFile.save();
+          configObj.set('siteLogo', logoParseFile);
+        }
+
+        configObj.set('bgMediaType', bgType);
+        if (bgFileRaw) {
+          const bgParseFile = new Parse.File(bgFileRaw.name, bgFileRaw);
+          await bgParseFile.save();
+          configObj.set('bgMediaFile', bgParseFile);
+        }
+
+        await configObj.save();
+        window.__siteConfigId = configObj.id;
+        applySiteConfig(configObj);
+        msg.textContent = 'Site settings saved.';
+        logoInput.value = '';
+        bgFileInput.value = '';
+      } catch (err) {
+        console.error('Error saving site settings', err);
+        msg.textContent = 'Failed to save site settings.';
+      }
+    }
+
+    async function fetchTeams() {
+      const body = document.getElementById('league-table-body');
+      const loading = document.getElementById('table-loading');
+      const emptyState = document.getElementById('table-empty-state');
+      const errorEl = document.getElementById('table-error');
+      body.innerHTML = '';
+      loading.classList.remove('hidden');
+      emptyState.classList.add('hidden');
+      errorEl.classList.add('hidden');
+
+      try {
+        const query = new Parse.Query(Team);
+        query.ascending('name');
+        const results = await query.find();
+
+        if (!results.length) {
+          emptyState.classList.remove('hidden');
+          document.getElementById('teams-players-empty').classList.remove('hidden');
+          document.getElementById('teams-players-list').innerHTML = '';
+          populateTeamOptions([]);
+          populatePlayerTeamOptions([]);
+          populateMatchTeamOptions([]);
+          return;
+        }
+
+        const teams = results.map(obj => {
+          const played = obj.get('played') || 0;
+          const wins = obj.get('wins') || 0;
+          const draws = obj.get('draws') || 0;
+          const losses = obj.get('losses') || 0;
+          const gf = obj.get('goalsFor') || 0;
+          const ga = obj.get('goalsAgainst') || 0;
+          const pts = obj.get('points');
+          const points = typeof pts === 'number' ? pts : wins * 3 + draws;
+          const gd = (obj.get('goalDifference') !== undefined && obj.get('goalDifference') !== null) ? obj.get('goalDifference') : gf - ga;
+          const last5 = obj.get('last5') || [];
+          return {
+            id: obj.id,
+            name: obj.get('name') || 'Unknown',
+            logoUrl: obj.get('logoFile') ? obj.get('logoFile').url() : (obj.get('logoUrl') || ''),
+            played,
+            wins,
+            draws,
+            losses,
+            gf,
+            ga,
+            gd,
+            points,
+            last5,
+          };
+        });
+
+        teams.sort((a, b) => {
+          if (b.points !== a.points) return b.points - a.points;
+          if (b.gd !== a.gd) return b.gd - a.gd;
+          if (b.gf !== a.gf) return b.gf - a.gf;
+          return a.name.localeCompare(b.name);
+        });
+
+        body.innerHTML = teams
+          .map((team, index) => {
+            return `<tr data-team-id="${team.id}" class="hover:bg-slate-900/60 transition-colors cursor-default">
+              <td class="px-3 py-2 text-xs text-muted">${index + 1}</td>
+              <td class="px-3 py-2">
+                <div class="flex items-center gap-2">
+                  ${team.logoUrl ? `<img src="${team.logoUrl}" alt="${team.name} logo" class="w-7 h-7 rounded-full object-cover border border-slate-700" />` : `<div class="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center text-[10px] text-muted">${team.name.charAt(0)}</div>`}
+                  <span class="text-sm font-medium">${team.name}</span>
+                </div>
+              </td>
+              <td class="px-2 py-2 text-center text-xs">${team.played}</td>
+              <td class="px-2 py-2 text-center text-xs">${team.wins}</td>
+              <td class="px-2 py-2 text-center text-xs">${team.draws}</td>
+              <td class="px-2 py-2 text-center text-xs">${team.losses}</td>
+              <td class="px-2 py-2 text-center text-xs">${team.gf}</td>
+              <td class="px-2 py-2 text-center text-xs">${team.ga}</td>
+              <td class="px-2 py-2 text-center text-xs ${team.gd >= 0 ? 'text-win' : 'text-loss'}">${team.gd}</td>
+              <td class="px-2 py-2 text-center text-xs font-semibold">${team.points}</td>
+              <td class="px-3 py-2 text-center text-xs">
+                <div class="inline-flex items-center justify-center">${renderLast5(team.last5)}</div>
+              </td>
+            </tr>`;
+          })
+          .join('');
+
+        populateAdminTeamsList(teams);
+        populateTeamOptions(teams);
+        populatePlayerTeamOptions(teams);
+        populateMatchTeamOptions(teams);
+        document.getElementById('teams-players-empty').classList.add('hidden');
+        await fetchPlayersForTeams(teams);
+      } catch (err) {
+        console.error('Error loading teams', err);
+        errorEl.textContent = 'Failed to load standings. Please try again later.';
+        errorEl.classList.remove('hidden');
+      } finally {
+        loading.classList.add('hidden');
+      }
+    }
+
+    function populateAdminTeamsList(teams) {
+      const list = document.getElementById('admin-teams-list');
+      if (!list) return;
+      if (!teams.length) {
+        list.innerHTML = '<p class="text-muted">No teams yet. Use the form to add one.</p>';
+        return;
+      }
+      list.innerHTML = teams
+        .map(team => `<button data-team-id="${team.id}" class="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-slate-900/60 border border-slate-800 text-left hover:border-primary hover:bg-slate-900 transition-colors">
+          <span class="text-xs font-medium">${team.name}</span>
+          <span class="text-[11px] text-muted">${team.points} pts</span>
+        </button>`)
+        .join('');
+
+      list.querySelectorAll('button[data-team-id]').forEach(btn => {
+        btn.addEventListener('click', () => loadTeamIntoForm(btn.getAttribute('data-team-id')));
+      });
+    }
+
+    function populateTeamOptions(teams) {
+      const container = document.getElementById('teams-players-list');
+      if (!container) return;
+      if (!teams.length) {
+        container.innerHTML = '';
+        return;
+      }
+      container.innerHTML = teams
+        .map(team => `<div class="border border-slate-800 rounded-xl p-3">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              ${team.logoUrl ? `<img src="${team.logoUrl}" alt="${team.name} logo" class="w-7 h-7 rounded-full object-cover border border-slate-700" />` : `<div class="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center text-[10px] text-muted">${team.name.charAt(0)}</div>`}
+              <div>
+                <p class="text-xs font-semibold">${team.name}</p>
+                <p class="text-[11px] text-muted">${team.points} pts • GD ${team.gd}</p>
+              </div>
+            </div>
+          </div>
+          <div id="players-for-${team.id}" class="mt-2 space-y-1 text-[11px] text-muted">
+            <span class="text-[11px]">Loading players…</span>
+          </div>
+        </div>`)
+        .join('');
+    }
+
+    function populatePlayerTeamOptions(teams) {
+      const select = document.getElementById('player-team');
+      if (!select) return;
+      select.innerHTML = '<option value="">Select a team</option>' + teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+    }
+
+    function populateMatchTeamOptions(teams) {
+      const homeSelect = document.getElementById('match-home');
+      const awaySelect = document.getElementById('match-away');
+      if (!homeSelect || !awaySelect) return;
+      const options = '<option value="">Select team</option>' + teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+      homeSelect.innerHTML = options;
+      awaySelect.innerHTML = options;
+    }
+
+    async function fetchPlayersForTeams(teams) {
+      const teamById = Object.fromEntries(teams.map(t => [t.id, t]));
+      const teamIds = Object.keys(teamById);
+      if (!teamIds.length) return;
+
+      try {
+        const query = new Parse.Query(Player);
+        const teamsPtrs = teamIds.map(id => {
+          const t = new Team();
+          t.id = id;
+          return t;
+        });
+        query.containedIn('team', teamsPtrs);
+        query.limit(1000);
+        const results = await query.find();
+
+        const byTeam = {};
+        results.forEach(p => {
+          const team = p.get('team');
+          if (!team) return;
+          const tid = team.id;
+          if (!byTeam[tid]) byTeam[tid] = [];
+          byTeam[tid].push({
+            id: p.id,
+            name: p.get('name') || 'Unnamed',
+            number: p.get('jerseyNumber'),
+            position: p.get('position') || '',
+          });
+        });
+
+        teamIds.forEach(tid => {
+          const container = document.getElementById('players-for-' + tid);
+          if (!container) return;
+          const players = byTeam[tid] || [];
+          if (!players.length) {
+            container.innerHTML = '<span>No players listed yet.</span>';
+          } else {
+            container.innerHTML = players
+              .map(pl => `<div class="flex items-center justify-between">
+                <span>${pl.number ? '#' + pl.number + ' ' : ''}${pl.name}</span>
+                <span>${pl.position}</span>
+              </div>`)
+              .join('');
+          }
+        });
+      } catch (err) {
+        console.error('Error fetching players', err);
+      }
+    }
+
+    async function loadTeamIntoForm(teamId) {
+      const query = new Parse.Query(Team);
+      try {
+        const obj = await query.get(teamId);
+        document.getElementById('team-id').value = obj.id;
+        document.getElementById('team-name').value = obj.get('name') || '';
+        document.getElementById('team-played').value = obj.get('played') || 0;
+        document.getElementById('team-wins').value = obj.get('wins') || 0;
+        document.getElementById('team-draws').value = obj.get('draws') || 0;
+        document.getElementById('team-losses').value = obj.get('losses') || 0;
+        document.getElementById('team-gf').value = obj.get('goalsFor') || 0;
+        document.getElementById('team-ga').value = obj.get('goalsAgainst') || 0;
+        document.getElementById('team-pts').value = obj.get('points') ?? '';
+        const last5 = obj.get('last5') || [];
+        document.getElementById('team-last5').value = last5.join(',');
+        document.getElementById('team-form-message').textContent = 'Editing ' + (obj.get('name') || 'team');
+        document.getElementById('team-delete-btn').classList.remove('hidden');
+      } catch (err) {
+        console.error('Error loading team', err);
+        document.getElementById('team-form-message').textContent = 'Failed to load team for editing.';
+      }
+    }
+
+    function resetTeamForm() {
+      document.getElementById('team-id').value = '';
+      document.getElementById('team-name').value = '';
+      document.getElementById('team-logo-file').value = '';
+      document.getElementById('team-played').value = 0;
+      document.getElementById('team-wins').value = 0;
+      document.getElementById('team-draws').value = 0;
+      document.getElementById('team-losses').value = 0;
+      document.getElementById('team-gf').value = 0;
+      document.getElementById('team-ga').value = 0;
+      document.getElementById('team-pts').value = 0;
+      document.getElementById('team-last5').value = '';
+      document.getElementById('team-form-message').textContent = '';
+      document.getElementById('team-delete-btn').classList.add('hidden');
+    }
+
+    async function saveTeam(event) {
+      event.preventDefault();
+      const msg = document.getElementById('team-form-message');
+      msg.textContent = 'Saving…';
+
+      const id = document.getElementById('team-id').value;
+      const name = document.getElementById('team-name').value.trim();
+      const played = Number(document.getElementById('team-played').value) || 0;
+      const wins = Number(document.getElementById('team-wins').value) || 0;
+      const draws = Number(document.getElementById('team-draws').value) || 0;
+      const losses = Number(document.getElementById('team-losses').value) || 0;
+      const gf = Number(document.getElementById('team-gf').value) || 0;
+      const ga = Number(document.getElementById('team-ga').value) || 0;
+      const ptsRaw = document.getElementById('team-pts').value;
+      const points = ptsRaw === '' ? wins * 3 + draws : Number(ptsRaw) || 0;
+      const gd = gf - ga;
+      const last5 = parseLast5(document.getElementById('team-last5').value);
+      const logoFileInput = document.getElementById('team-logo-file');
+      const newLogo = logoFileInput.files[0];
+
+      if (!name) {
+        msg.textContent = 'Team name is required.';
+        return;
+      }
+
+      try {
+        let teamObj;
+        if (id) {
+          const query = new Parse.Query(Team);
+          teamObj = await query.get(id);
+        } else {
+          teamObj = new Team();
+        }
+        teamObj.set('name', name);
+        teamObj.set('played', played);
+        teamObj.set('wins', wins);
+        teamObj.set('draws', draws);
+        teamObj.set('losses', losses);
+        teamObj.set('goalsFor', gf);
+        teamObj.set('goalsAgainst', ga);
+        teamObj.set('goalDifference', gd);
+        teamObj.set('points', points);
+        teamObj.set('last5', last5);
+
+        if (newLogo) {
+          const parseFile = new Parse.File(newLogo.name, newLogo);
+          await parseFile.save();
+          teamObj.set('logoFile', parseFile);
+        }
+
+        await teamObj.save();
+        await fetchTeams();
+
+        if (!id) {
+          resetTeamForm();
+          msg.textContent = 'Team added. You can add another team.';
+        } else {
+          msg.textContent = 'Team updated.';
+          logoFileInput.value = '';
+        }
+      } catch (err) {
+        console.error('Error saving team', err);
+        msg.textContent = 'Failed to save team.';
+      }
+    }
+
+    async function deleteTeam() {
+      const id = document.getElementById('team-id').value;
+      const msg = document.getElementById('team-form-message');
+      if (!id) {
+        msg.textContent = 'Select a team first.';
+        return;
+      }
+      if (!confirm('Are you sure you want to delete this team?')) return;
+      msg.textContent = 'Deleting…';
+      try {
+        const query = new Parse.Query(Team);
+        const obj = await query.get(id);
+        await obj.destroy();
+        msg.textContent = 'Team deleted.';
+        resetTeamForm();
+        await fetchTeams();
+      } catch (err) {
+        console.error('Error deleting team', err);
+        msg.textContent = 'Failed to delete team.';
+      }
+    }
+
+    async function saveMatch(event) {
+      event.preventDefault();
+      const msg = document.getElementById('match-form-message');
+      msg.textContent = 'Saving…';
+
+      const id = document.getElementById('match-id').value;
+      const homeId = document.getElementById('match-home').value;
+      const awayId = document.getElementById('match-away').value;
+      const homeGoals = Number(document.getElementById('match-home-goals').value) || 0;
+      const awayGoals = Number(document.getElementById('match-away-goals').value) || 0;
+      const date = document.getElementById('match-date').value;
+      const status = document.getElementById('match-status').value;
+
+      if (!homeId || !awayId || homeId === awayId) {
+        msg.textContent = 'Please choose two different teams.';
+        return;
+      }
+
+      try {
+        let matchObj;
+        if (id) {
+          const query = new Parse.Query(Match);
+          matchObj = await query.get(id);
+        } else {
+          matchObj = new Match();
+        }
+
+        const homeTeam = new Team();
+        homeTeam.id = homeId;
+        const awayTeam = new Team();
+        awayTeam.id = awayId;
+
+        matchObj.set('homeTeam', homeTeam);
+        matchObj.set('awayTeam', awayTeam);
+        matchObj.set('homeGoals', homeGoals);
+        matchObj.set('awayGoals', awayGoals);
+        matchObj.set('status', status);
+        if (date) matchObj.set('matchDate', new Date(date));
+
+        await matchObj.save();
+        msg.textContent = 'Match saved.';
+        document.getElementById('match-id').value = '';
+        document.getElementById('match-home-goals').value = 0;
+        document.getElementById('match-away-goals').value = 0;
+        document.getElementById('match-status').value = 'upcoming';
+        document.getElementById('match-delete-btn').classList.add('hidden');
+        await fetchMatches();
+      } catch (err) {
+        console.error('Error saving match', err);
+        msg.textContent = 'Failed to save match.';
+      }
+    }
+
+    async function fetchMatches() {
+      const list = document.getElementById('matches-list');
+      const empty = document.getElementById('matches-empty');
+      list.innerHTML = '';
+      empty.classList.add('hidden');
+
+      try {
+        const query = new Parse.Query(Match);
+        query.include('homeTeam');
+        query.include('awayTeam');
+        query.descending('matchDate');
+        const results = await query.find();
+
+        if (!results.length) {
+          empty.classList.remove('hidden');
+          return;
+        }
+
+        list.innerHTML = results
+          .map(obj => {
+            const home = obj.get('homeTeam');
+            const away = obj.get('awayTeam');
+            const homeName = home?.get('name') || 'Home';
+            const awayName = away?.get('name') || 'Away';
+            const homeGoals = obj.get('homeGoals');
+            const awayGoals = obj.get('awayGoals');
+            const status = obj.get('status') || 'upcoming';
+            const date = obj.get('matchDate') ? new Date(obj.get('matchDate')).toLocaleDateString() : 'TBD';
+            const score = status === 'finished' ? `${homeGoals} - ${awayGoals}` : 'vs';
+            return `<button data-match-id="${obj.id}" class="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-slate-900/60 border border-slate-800 text-left hover:border-primary hover:bg-slate-900 transition-colors">
+              <div>
+                <p class="font-medium text-xs">${homeName} ${score} ${awayName}</p>
+                <p class="text-[11px] text-muted">${date} • ${status}</p>
+              </div>
+            </button>`;
+          })
+          .join('');
+
+        list.querySelectorAll('button[data-match-id]').forEach(btn => {
+          btn.addEventListener('click', () => loadMatchIntoForm(btn.getAttribute('data-match-id')));
+        });
+      } catch (err) {
+        console.error('Error loading matches', err);
+      }
+    }
+
+    async function loadMatchIntoForm(id) {
+      const msg = document.getElementById('match-form-message');
+      msg.textContent = '';
+      try {
+        const query = new Parse.Query(Match);
+        const obj = await query.get(id);
+        document.getElementById('match-id').value = obj.id;
+        document.getElementById('match-home').value = obj.get('homeTeam')?.id || '';
+        document.getElementById('match-away').value = obj.get('awayTeam')?.id || '';
+        document.getElementById('match-home-goals').value = obj.get('homeGoals') ?? 0;
+        document.getElementById('match-away-goals').value = obj.get('awayGoals') ?? 0;
+        const date = obj.get('matchDate');
+        document.getElementById('match-date').value = date ? new Date(date).toISOString().slice(0, 10) : '';
+        document.getElementById('match-status').value = obj.get('status') || 'upcoming';
+        document.getElementById('match-delete-btn').classList.remove('hidden');
+        msg.textContent = 'Editing match.';
+      } catch (err) {
+        console.error('Error loading match', err);
+        msg.textContent = 'Failed to load match.';
+      }
+    }
+
+    async function deleteMatch() {
+      const id = document.getElementById('match-id').value;
+      const msg = document.getElementById('match-form-message');
+      if (!id) {
+        msg.textContent = 'Select a match first.';
+        return;
+      }
+      if (!confirm('Are you sure you want to delete this match?')) return;
+      msg.textContent = 'Deleting…';
+      try {
+        const query = new Parse.Query(Match);
+        const obj = await query.get(id);
+        await obj.destroy();
+        msg.textContent = 'Match deleted.';
+        document.getElementById('match-id').value = '';
+        document.getElementById('match-delete-btn').classList.add('hidden');
+        await fetchMatches();
+      } catch (err) {
+        console.error('Error deleting match', err);
+        msg.textContent = 'Failed to delete match.';
+      }
+    }
+
+    function resetMatchForm() {
+      document.getElementById('match-id').value = '';
+      document.getElementById('match-home').value = '';
+      document.getElementById('match-away').value = '';
+      document.getElementById('match-home-goals').value = 0;
+      document.getElementById('match-away-goals').value = 0;
+      document.getElementById('match-date').value = '';
+      document.getElementById('match-status').value = 'upcoming';
+      document.getElementById('match-delete-btn').classList.add('hidden');
+      document.getElementById('match-form-message').textContent = '';
+    }
+
+    async function savePlayer(event) {
+      event.preventDefault();
+      const msg = document.getElementById('player-form-message');
+      msg.textContent = 'Saving…';
+
+      const id = document.getElementById('player-id').value;
+      const name = document.getElementById('player-name').value.trim();
+      const number = Number(document.getElementById('player-number').value) || null;
+      const position = document.getElementById('player-position').value.trim();
+      const teamId = document.getElementById('player-team').value;
+
+      if (!name || !teamId) {
+        msg.textContent = 'Player name and team are required.';
+        return;
+      }
+
+      try {
+        let playerObj;
+        if (id) {
+          const query = new Parse.Query(Player);
+          playerObj = await query.get(id);
+        } else {
+          playerObj = new Player();
+        }
+        playerObj.set('name', name);
+        if (number !== null) playerObj.set('jerseyNumber', number);
+        playerObj.set('position', position);
+        const team = new Team();
+        team.id = teamId;
+        playerObj.set('team', team);
+        await playerObj.save();
+        msg.textContent = id ? 'Player updated.' : 'Player added.';
+        resetPlayerForm();
+        await fetchTeams();
+      } catch (err) {
+        console.error('Error saving player', err);
+        msg.textContent = 'Failed to save player.';
+      }
+    }
+
+    async function loadPlayerIntoForm(id) {
+      const msg = document.getElementById('player-form-message');
+      msg.textContent = '';
+      try {
+        const query = new Parse.Query(Player);
+        query.include('team');
+        const obj = await query.get(id);
+        document.getElementById('player-id').value = obj.id;
+        document.getElementById('player-name').value = obj.get('name') || '';
+        document.getElementById('player-number').value = obj.get('jerseyNumber') ?? '';
+        document.getElementById('player-position').value = obj.get('position') || '';
+        document.getElementById('player-team').value = obj.get('team')?.id || '';
+        msg.textContent = 'Editing player.';
+        document.getElementById('player-delete-btn').classList.remove('hidden');
+      } catch (err) {
+        console.error('Error loading player', err);
+        msg.textContent = 'Failed to load player.';
+      }
+    }
+
+    async function deletePlayer() {
+      const id = document.getElementById('player-id').value;
+      const msg = document.getElementById('player-form-message');
+      if (!id) {
+        msg.textContent = 'Select a player first.';
+        return;
+      }
+      if (!confirm('Are you sure you want to delete this player?')) return;
+      msg.textContent = 'Deleting…';
+      try {
+        const query = new Parse.Query(Player);
+        const obj = await query.get(id);
+        await obj.destroy();
+        msg.textContent = 'Player deleted.';
+        resetPlayerForm();
+        await fetchTeams();
+      } catch (err) {
+        console.error('Error deleting player', err);
+        msg.textContent = 'Failed to delete player.';
+      }
+    }
+
+    function resetPlayerForm() {
+      document.getElementById('player-id').value = '';
+      document.getElementById('player-name').value = '';
+      document.getElementById('player-number').value = '';
+      document.getElementById('player-position').value = '';
+      document.getElementById('player-team').value = '';
+      document.getElementById('player-delete-btn').classList.add('hidden');
+      document.getElementById('player-form-message').textContent = '';
+    }
+
+    // Announcements
+
+    async function fetchAnnouncements() {
+      const list = document.getElementById('announcements-list');
+      const empty = document.getElementById('announcements-empty');
+      if (!list || !empty) return;
+
+      list.innerHTML = '';
+      empty.classList.add('hidden');
+
+      try {
+        const query = new Parse.Query(Announcement);
+        query.descending('publishedAt');
+        query.limit(20);
+        const results = await query.find();
+
+        if (!results.length) {
+          empty.classList.remove('hidden');
+          // Also keep admin list in sync
+          populateAdminAnnouncementsList([]);
+          return;
+        }
+
+        list.innerHTML = results.map(obj => {
+          const title = obj.get('title') || 'Announcement';
+          const message = obj.get('message') || '';
+          const date = obj.get('publishedAt') || obj.get('createdAt');
+          const dateStr = date ? new Date(date).toLocaleDateString() : '';
+          return `
+            <article class="border border-slate-800 rounded-lg px-3 py-2 bg-slate-900/60">
+              <header class="flex items-center justify-between">
+                <h3 class="text-xs font-semibold">${title}</h3>
+                <span class="text-[11px] text-muted">${dateStr}</span>
+              </header>
+              <p class="mt-1 text-xs text-gray-100 whitespace-pre-wrap">${message}</p>
+            </article>
+          `;
+        }).join('');
+
+        populateAdminAnnouncementsList(results);
+      } catch (err) {
+        console.error('Error loading announcements', err);
+        empty.classList.remove('hidden');
+        empty.textContent = 'Failed to load announcements.';
+        populateAdminAnnouncementsList([]);
+      }
+    }
+
+    function populateAdminAnnouncementsList(objs) {
+      const list = document.getElementById('admin-announcements-list');
+      if (!list) return;
+      if (!objs.length) {
+        list.innerHTML = '<p class="text-muted text-xs">No announcements yet.</p>';
+        return;
+      }
+      list.innerHTML = objs.map(obj => {
+        const title = obj.get('title') || 'Announcement';
+        const date = obj.get('publishedAt') || obj.get('createdAt');
+        const dateStr = date ? new Date(date).toLocaleDateString() : '';
+        return `
+          <button data-announcement-id="${obj.id}"
+            class="w-full flex items-center justify-between px-3 py-2 rounded-lg
+                   bg-slate-900/60 border border-slate-800 text-left
+                   hover:border-primary hover:bg-slate-900 transition-colors">
+            <span class="text-xs font-medium">${title}</span>
+            <span class="text-[11px] text-muted">${dateStr}</span>
+          </button>
+        `;
+      }).join('');
+
+      list.querySelectorAll('button[data-announcement-id]').forEach(btn => {
+        btn.addEventListener('click', () => loadAnnouncementIntoForm(btn.getAttribute('data-announcement-id')));
+      });
+    }
+
+    async function loadAnnouncementIntoForm(id) {
+      const msg = document.getElementById('announcement-form-message');
+      msg.textContent = '';
+      try {
+        const query = new Parse.Query(Announcement);
+        const obj = await query.get(id);
+        document.getElementById('announcement-id').value = obj.id;
+        document.getElementById('announcement-title').value = obj.get('title') || '';
+        document.getElementById('announcement-message').value = obj.get('message') || '';
+        document.getElementById('announcement-delete-btn').classList.remove('hidden');
+        msg.textContent = 'Editing announcement.';
+      } catch (err) {
+        console.error('Error loading announcement', err);
+        msg.textContent = 'Failed to load announcement.';
+      }
+    }
+
+    function resetAnnouncementForm() {
+      document.getElementById('announcement-id').value = '';
+      document.getElementById('announcement-title').value = '';
+      document.getElementById('announcement-message').value = '';
+      document.getElementById('announcement-delete-btn').classList.add('hidden');
+      document.getElementById('announcement-form-message').textContent = '';
+    }
+
+    async function saveAnnouncement(event) {
+      event.preventDefault();
+      const msg = document.getElementById('announcement-form-message');
+      msg.textContent = 'Saving…';
+
+      const id = document.getElementById('announcement-id').value;
+      const title = document.getElementById('announcement-title').value.trim();
+      const message = document.getElementById('announcement-message').value.trim();
+
+      if (!title || !message) {
+        msg.textContent = 'Title and message are required.';
+        return;
+      }
+
+      try {
+        let obj;
+        if (id) {
+          const query = new Parse.Query(Announcement);
+          obj = await query.get(id);
+        } else {
+          obj = new Announcement();
+          obj.set('publishedAt', new Date());
+        }
+        obj.set('title', title);
+        obj.set('message', message);
+        await obj.save();
+        msg.textContent = id ? 'Announcement updated.' : 'Announcement added.';
+        resetAnnouncementForm();
+        await fetchAnnouncements();
+      } catch (err) {
+        console.error('Error saving announcement', err);
+        msg.textContent = 'Failed to save announcement.';
+      }
+    }
+
+    async function deleteAnnouncement() {
+      const id = document.getElementById('announcement-id').value;
+      const msg = document.getElementById('announcement-form-message');
+      if (!id) {
+        msg.textContent = 'Select an announcement first.';
+        return;
+      }
+      if (!confirm('Are you sure you want to delete this announcement?')) return;
+      msg.textContent = 'Deleting…';
+      try {
+        const query = new Parse.Query(Announcement);
+        const obj = await query.get(id);
+        await obj.destroy();
+        msg.textContent = 'Announcement deleted.';
+        resetAnnouncementForm();
+        await fetchAnnouncements();
+      } catch (err) {
+        console.error('Error deleting announcement', err);
+        msg.textContent = 'Failed to delete announcement.';
+      }
+    }
+
+    function updateAuthUI() {
+      const user = Parse.User.current();
+      const adminPanel = document.getElementById('admin-panel');
+      const loginBtn = document.getElementById('admin-login-btn');
+      const logoutBtn = document.getElementById('logout-btn');
+      if (user) {
+        adminPanel.classList.remove('hidden');
+        loginBtn.classList.add('hidden');
+        logoutBtn.classList.remove('hidden');
+      } else {
+        adminPanel.classList.add('hidden');
+        loginBtn.classList.remove('hidden');
+        logoutBtn.classList.add('hidden');
+      }
+    }
+
+    async function handleLogin(event) {
+      event.preventDefault();
+      const username = document.getElementById('login-username').value.trim();
+      const password = document.getElementById('login-password').value;
+      const message = document.getElementById('login-message');
+      message.textContent = 'Logging in…';
+      try {
+        await Parse.User.logIn(username, password);
+        message.textContent = 'Logged in.';
+        document.getElementById('admin-login-modal').classList.add('hidden');
+        updateAuthUI();
+      } catch (err) {
+        console.error('Login error', err);
+        message.textContent = 'Invalid credentials or not an admin.';
+      }
+    }
+
+    async function handleLogout() {
+      try {
+        await Parse.User.logOut();
+      } catch (err) {
+        console.error('Logout error', err);
+      } finally {
+        updateAuthUI();
+      }
+    }
+
+    function setupLoginModal() {
+      const modal = document.getElementById('admin-login-modal');
+      const openBtn = document.getElementById('admin-login-btn');
+      const closeBtn = document.getElementById('close-login-modal');
+
+      openBtn.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+      });
+      closeBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+      });
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.add('hidden');
+      });
+    }
+
+    function setupNav() {
+      const sectionTable = document.getElementById('section-table');
+      const sectionMatches = document.getElementById('section-matches');
+      const sectionPlayers = document.getElementById('section-players');
+      const navTable = document.getElementById('nav-table');
+      const navMatches = document.getElementById('nav-matches');
+      const navPlayers = document.getElementById('nav-players');
+
+      function activate(target) {
+        sectionTable.classList.toggle('hidden', target !== 'table');
+        sectionMatches.classList.toggle('hidden', target !== 'matches');
+        sectionPlayers.classList.toggle('hidden', target !== 'players');
+
+        [navTable, navMatches, navPlayers].forEach(btn => {
+          btn.classList.remove('border-slate-500', 'text-gray-100');
+        });
+        if (target === 'table') {
+          navTable.classList.add('border-slate-500', 'text-gray-100');
+        } else if (target === 'matches') {
+          navMatches.classList.add('border-slate-500', 'text-gray-100');
+        } else {
+          navPlayers.classList.add('border-slate-500', 'text-gray-100');
+        }
+      }
+
+      navTable.addEventListener('click', () => activate('table'));
+      navMatches.addEventListener('click', () => activate('matches'));
+      navPlayers.addEventListener('click', () => activate('players'));
+
+      activate('table');
+    }
+
+    function applyTheme(theme) {
+      const htmlEl = document.documentElement;
+      const icon = document.getElementById('theme-toggle-icon');
+      const label = document.getElementById('theme-toggle-label');
+      if (theme === 'light') {
+        htmlEl.classList.remove('dark');
+        document.body.classList.remove('bg-slate-950', 'text-gray-100');
+        document.body.classList.add('bg-slate-100', 'text-slate-900');
+        icon.textContent = '☀️';
+        label.textContent = 'Light';
+      } else {
+        htmlEl.classList.add('dark');
+        document.body.classList.add('bg-slate-950', 'text-gray-100');
+        document.body.classList.remove('bg-slate-100', 'text-slate-900');
+        icon.textContent = '🌙';
+        label.textContent = 'Dark';
+      }
+    }
+
+    function setupThemeToggle() {
+      const btn = document.getElementById('theme-toggle');
+      const stored = localStorage.getItem('league-theme');
+      if (stored === 'light' || stored === 'dark') {
+        applyTheme(stored);
+      } else {
+        applyTheme('dark');
+      }
+      btn.addEventListener('click', () => {
+        const current = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        const next = current === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+        localStorage.setItem('league-theme', next);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadSiteConfig();
+      fetchTeams();
+      fetchMatches();
+      fetchAnnouncements(); // new
+
+      setupLoginModal();
+      setupNav();
+      setupThemeToggle();
+      updateAuthUI();
+
+      document.getElementById('site-settings-form').addEventListener('submit', saveSiteSettings);
+      document.getElementById('team-form').addEventListener('submit', saveTeam);
+      document.getElementById('team-reset-btn').addEventListener('click', resetTeamForm);
+      document.getElementById('team-delete-btn').addEventListener('click', deleteTeam);
+      document.getElementById('match-form').addEventListener('submit', saveMatch);
+      document.getElementById('match-reset-btn').addEventListener('click', resetMatchForm);
+      document.getElementById('match-delete-btn').addEventListener('click', deleteMatch);
+      document.getElementById('player-form').addEventListener('submit', savePlayer);
+      document.getElementById('player-reset-btn').addEventListener('click', resetPlayerForm);
+      document.getElementById('player-delete-btn').addEventListener('click', deletePlayer);
+      document.getElementById('login-form').addEventListener('submit', handleLogin);
+      document.getElementById('logout-btn').addEventListener('click', handleLogout);
+
+      // Announcements admin handlers
+      document.getElementById('announcement-form').addEventListener('submit', saveAnnouncement);
+      document.getElementById('announcement-reset-btn').addEventListener('click', resetAnnouncementForm);
+      document.getElementById('announcement-delete-btn').addEventListener('click', deleteAnnouncement);
+    });
+  </script>
+
+  <script src="flowbite.min.js"></script>
+</body>
+</html>
