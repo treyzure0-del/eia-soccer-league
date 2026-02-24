@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>School Soccer League</title>
-  <script src="index1.dat"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -14,7 +14,7 @@
             bg: '#050816',
             surface: '#0b1020',
             border: '#1f2937',
-            text: '#000080',
+            text: '#f9fafb',
             muted: '#9ca3af',
             primary: '#2563eb',
             primarySoft: '#1d4ed8',
@@ -398,7 +398,7 @@
     </section>
   </main>
 
-  <!-- Theme Toggle Button (bottom-right, on all pages) -->
+  <!-- Theme Toggle Button -->
   <button id="theme-toggle" class="fixed bottom-4 right-4 z-40 inline-flex items-center gap-1 rounded-full border border-slate-700 bg-slate-900/80 px-3 py-1.5 text-xs text-muted hover:border-primary hover:text-gray-100 shadow-lg shadow-black/40 backdrop-blur transition-colors" type="button" aria-label="Toggle dark mode">
     <span id="theme-toggle-icon">🌙</span>
     <span id="theme-toggle-label">Dark</span>
@@ -433,7 +433,7 @@
     </div>
   </div>
 
-  <script src="parse.min.js"></script>
+  <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
   <script>
     Parse.initialize('6M8ibNOLPRIUzUixE1M5Krys1Bl5aKf8isZj1x2X', 'PcVwkrhcXvRACmtKzTRt8tsCf8mEuzPNXwD9zenq');
     Parse.serverURL = 'https://parseapi.back4app.com/';
@@ -574,6 +574,160 @@
       } catch (err) {
         console.error('Error saving site settings', err);
         msg.textContent = 'Failed to save site settings.';
+      }
+    }
+
+    async function fetchAnnouncements() {
+      const list = document.getElementById('announcements-list');
+      const empty = document.getElementById('announcements-empty');
+      if (!list || !empty) return;
+
+      list.innerHTML = '';
+      empty.classList.add('hidden');
+
+      try {
+        const query = new Parse.Query(Announcement);
+        query.descending('publishedAt');
+        query.limit(20);
+        const results = await query.find();
+
+        if (!results.length) {
+          empty.classList.remove('hidden');
+          populateAdminAnnouncementsList([]);
+          return;
+        }
+
+        list.innerHTML = results.map(obj => {
+          const title = obj.get('title') || 'Announcement';
+          const message = obj.get('message') || '';
+          const date = obj.get('publishedAt') || obj.get('createdAt');
+          const dateStr = date ? new Date(date).toLocaleDateString() : '';
+          return `
+            <article class="border border-slate-800 rounded-lg px-3 py-2 bg-slate-900/60">
+              <header class="flex items-center justify-between">
+                <h3 class="text-xs font-semibold">${title}</h3>
+                <span class="text-[11px] text-muted">${dateStr}</span>
+              </header>
+              <p class="mt-1 text-xs text-gray-100 whitespace-pre-wrap">${message}</p>
+            </article>
+          `;
+        }).join('');
+
+        populateAdminAnnouncementsList(results);
+      } catch (err) {
+        console.error('Error loading announcements', err);
+        empty.classList.remove('hidden');
+        empty.textContent = 'Failed to load announcements.';
+        populateAdminAnnouncementsList([]);
+      }
+    }
+
+    function populateAdminAnnouncementsList(objs) {
+      const list = document.getElementById('admin-announcements-list');
+      if (!list) return;
+      if (!objs.length) {
+        list.innerHTML = '<p class="text-muted text-xs">No announcements yet.</p>';
+        return;
+      }
+      list.innerHTML = objs.map(obj => {
+        const title = obj.get('title') || 'Announcement';
+        const date = obj.get('publishedAt') || obj.get('createdAt');
+        const dateStr = date ? new Date(date).toLocaleDateString() : '';
+        return `
+          <button data-announcement-id="${obj.id}"
+            class="w-full flex items-center justify-between px-3 py-2 rounded-lg
+                   bg-slate-900/60 border border-slate-800 text-left
+                   hover:border-primary hover:bg-slate-900 transition-colors">
+            <span class="text-xs font-medium">${title}</span>
+            <span class="text-[11px] text-muted">${dateStr}</span>
+          </button>
+        `;
+      }).join('');
+
+      list.querySelectorAll('button[data-announcement-id]').forEach(btn => {
+        btn.addEventListener('click', () => loadAnnouncementIntoForm(btn.getAttribute('data-announcement-id')));
+      });
+    }
+
+    async function loadAnnouncementIntoForm(id) {
+      const msg = document.getElementById('announcement-form-message');
+      msg.textContent = '';
+      try {
+        const query = new Parse.Query(Announcement);
+        const obj = await query.get(id);
+        document.getElementById('announcement-id').value = obj.id;
+        document.getElementById('announcement-title').value = obj.get('title') || '';
+        document.getElementById('announcement-message').value = obj.get('message') || '';
+        document.getElementById('announcement-delete-btn').classList.remove('hidden');
+        msg.textContent = 'Editing announcement.';
+      } catch (err) {
+        console.error('Error loading announcement', err);
+        msg.textContent = 'Failed to load announcement.';
+      }
+    }
+
+    function resetAnnouncementForm() {
+      document.getElementById('announcement-id').value = '';
+      document.getElementById('announcement-title').value = '';
+      document.getElementById('announcement-message').value = '';
+      document.getElementById('announcement-delete-btn').classList.add('hidden');
+      document.getElementById('announcement-form-message').textContent = '';
+    }
+
+    async function saveAnnouncement(event) {
+      event.preventDefault();
+      const msg = document.getElementById('announcement-form-message');
+      msg.textContent = 'Saving…';
+
+      const id = document.getElementById('announcement-id').value;
+      const title = document.getElementById('announcement-title').value.trim();
+      const message = document.getElementById('announcement-message').value.trim();
+
+      if (!title || !message) {
+        msg.textContent = 'Title and message are required.';
+        return;
+      }
+
+      try {
+        let obj;
+        if (id) {
+          const query = new Parse.Query(Announcement);
+          obj = await query.get(id);
+        } else {
+          obj = new Announcement();
+          obj.set('publishedAt', new Date());
+        }
+        obj.set('title', title);
+        obj.set('message', message);
+        await obj.save();
+        msg.textContent = id ? 'Announcement updated.' : 'Announcement added.';
+        resetAnnouncementForm();
+        await fetchAnnouncements();
+      } catch (err) {
+        console.error('Error saving announcement', err);
+        msg.textContent = 'Failed to save announcement.';
+      }
+    }
+
+    async function deleteAnnouncement() {
+      const id = document.getElementById('announcement-id').value;
+      const msg = document.getElementById('announcement-form-message');
+      if (!id) {
+        msg.textContent = 'Select an announcement first.';
+        return;
+      }
+      if (!confirm('Are you sure you want to delete this announcement?')) return;
+      msg.textContent = 'Deleting…';
+      try {
+        const query = new Parse.Query(Announcement);
+        const obj = await query.get(id);
+        await obj.destroy();
+        msg.textContent = 'Announcement deleted.';
+        resetAnnouncementForm();
+        await fetchAnnouncements();
+      } catch (err) {
+        console.error('Error deleting announcement', err);
+        msg.textContent = 'Failed to delete announcement.';
       }
     }
 
@@ -1160,163 +1314,6 @@
       document.getElementById('player-form-message').textContent = '';
     }
 
-    // Announcements
-
-    async function fetchAnnouncements() {
-      const list = document.getElementById('announcements-list');
-      const empty = document.getElementById('announcements-empty');
-      if (!list || !empty) return;
-
-      list.innerHTML = '';
-      empty.classList.add('hidden');
-
-      try {
-        const query = new Parse.Query(Announcement);
-        query.descending('publishedAt');
-        query.limit(20);
-        const results = await query.find();
-
-        if (!results.length) {
-          empty.classList.remove('hidden');
-          // Also keep admin list in sync
-          populateAdminAnnouncementsList([]);
-          return;
-        }
-
-        list.innerHTML = results.map(obj => {
-          const title = obj.get('title') || 'Announcement';
-          const message = obj.get('message') || '';
-          const date = obj.get('publishedAt') || obj.get('createdAt');
-          const dateStr = date ? new Date(date).toLocaleDateString() : '';
-          return `
-            <article class="border border-slate-800 rounded-lg px-3 py-2 bg-slate-900/60">
-              <header class="flex items-center justify-between">
-                <h3 class="text-xs font-semibold">${title}</h3>
-                <span class="text-[11px] text-muted">${dateStr}</span>
-              </header>
-              <p class="mt-1 text-xs text-gray-100 whitespace-pre-wrap">${message}</p>
-            </article>
-          `;
-        }).join('');
-
-        populateAdminAnnouncementsList(results);
-      } catch (err) {
-        console.error('Error loading announcements', err);
-        empty.classList.remove('hidden');
-        empty.textContent = 'Failed to load announcements.';
-        populateAdminAnnouncementsList([]);
-      }
-    }
-
-    function populateAdminAnnouncementsList(objs) {
-      const list = document.getElementById('admin-announcements-list');
-      if (!list) return;
-      if (!objs.length) {
-        list.innerHTML = '<p class="text-muted text-xs">No announcements yet.</p>';
-        return;
-      }
-      list.innerHTML = objs.map(obj => {
-        const title = obj.get('title') || 'Announcement';
-        const date = obj.get('publishedAt') || obj.get('createdAt');
-        const dateStr = date ? new Date(date).toLocaleDateString() : '';
-        return `
-          <button data-announcement-id="${obj.id}"
-            class="w-full flex items-center justify-between px-3 py-2 rounded-lg
-                   bg-slate-900/60 border border-slate-800 text-left
-                   hover:border-primary hover:bg-slate-900 transition-colors">
-            <span class="text-xs font-medium">${title}</span>
-            <span class="text-[11px] text-muted">${dateStr}</span>
-          </button>
-        `;
-      }).join('');
-
-      list.querySelectorAll('button[data-announcement-id]').forEach(btn => {
-        btn.addEventListener('click', () => loadAnnouncementIntoForm(btn.getAttribute('data-announcement-id')));
-      });
-    }
-
-    async function loadAnnouncementIntoForm(id) {
-      const msg = document.getElementById('announcement-form-message');
-      msg.textContent = '';
-      try {
-        const query = new Parse.Query(Announcement);
-        const obj = await query.get(id);
-        document.getElementById('announcement-id').value = obj.id;
-        document.getElementById('announcement-title').value = obj.get('title') || '';
-        document.getElementById('announcement-message').value = obj.get('message') || '';
-        document.getElementById('announcement-delete-btn').classList.remove('hidden');
-        msg.textContent = 'Editing announcement.';
-      } catch (err) {
-        console.error('Error loading announcement', err);
-        msg.textContent = 'Failed to load announcement.';
-      }
-    }
-
-    function resetAnnouncementForm() {
-      document.getElementById('announcement-id').value = '';
-      document.getElementById('announcement-title').value = '';
-      document.getElementById('announcement-message').value = '';
-      document.getElementById('announcement-delete-btn').classList.add('hidden');
-      document.getElementById('announcement-form-message').textContent = '';
-    }
-
-    async function saveAnnouncement(event) {
-      event.preventDefault();
-      const msg = document.getElementById('announcement-form-message');
-      msg.textContent = 'Saving…';
-
-      const id = document.getElementById('announcement-id').value;
-      const title = document.getElementById('announcement-title').value.trim();
-      const message = document.getElementById('announcement-message').value.trim();
-
-      if (!title || !message) {
-        msg.textContent = 'Title and message are required.';
-        return;
-      }
-
-      try {
-        let obj;
-        if (id) {
-          const query = new Parse.Query(Announcement);
-          obj = await query.get(id);
-        } else {
-          obj = new Announcement();
-          obj.set('publishedAt', new Date());
-        }
-        obj.set('title', title);
-        obj.set('message', message);
-        await obj.save();
-        msg.textContent = id ? 'Announcement updated.' : 'Announcement added.';
-        resetAnnouncementForm();
-        await fetchAnnouncements();
-      } catch (err) {
-        console.error('Error saving announcement', err);
-        msg.textContent = 'Failed to save announcement.';
-      }
-    }
-
-    async function deleteAnnouncement() {
-      const id = document.getElementById('announcement-id').value;
-      const msg = document.getElementById('announcement-form-message');
-      if (!id) {
-        msg.textContent = 'Select an announcement first.';
-        return;
-      }
-      if (!confirm('Are you sure you want to delete this announcement?')) return;
-      msg.textContent = 'Deleting…';
-      try {
-        const query = new Parse.Query(Announcement);
-        const obj = await query.get(id);
-        await obj.destroy();
-        msg.textContent = 'Announcement deleted.';
-        resetAnnouncementForm();
-        await fetchAnnouncements();
-      } catch (err) {
-        console.error('Error deleting announcement', err);
-        msg.textContent = 'Failed to delete announcement.';
-      }
-    }
-
     function updateAuthUI() {
       const user = Parse.User.current();
       const adminPanel = document.getElementById('admin-panel');
@@ -1447,7 +1444,7 @@
       loadSiteConfig();
       fetchTeams();
       fetchMatches();
-      fetchAnnouncements(); // new
+      fetchAnnouncements();
 
       setupLoginModal();
       setupNav();
@@ -1464,18 +1461,14 @@
       document.getElementById('player-form').addEventListener('submit', savePlayer);
       document.getElementById('player-reset-btn').addEventListener('click', resetPlayerForm);
       document.getElementById('player-delete-btn').addEventListener('click', deletePlayer);
-      document.getElementById('login-form').addEventListener('submit', handleLogin);
-      document.getElementById('logout-btn').addEventListener('click', handleLogout);
-
-      // Announcements admin handlers
       document.getElementById('announcement-form').addEventListener('submit', saveAnnouncement);
       document.getElementById('announcement-reset-btn').addEventListener('click', resetAnnouncementForm);
       document.getElementById('announcement-delete-btn').addEventListener('click', deleteAnnouncement);
+      document.getElementById('login-form').addEventListener('submit', handleLogin);
+      document.getElementById('logout-btn').addEventListener('click', handleLogout);
     });
   </script>
 
-  <script src="flowbite.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.0/dist/flowbite.min.js"></script>
 </body>
-
 </html>
-
