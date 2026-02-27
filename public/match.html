@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Match Details | School Soccer League</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            bg: '#050816',
+            surface: '#0b1020',
+            border: '#1f2937',
+            text: '#f9fafb',
+            muted: '#9ca3af',
+            primary: '#2563eb',
+            primarySoft: '#1d4ed8',
+            win: '#22c55e',
+            draw: '#eab308',
+            loss: '#ef4444',
+          },
+          fontFamily: {
+            heading: ['system-ui', 'sans-serif'],
+            body: ['system-ui', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <link href="https://cdn.jsdelivr.net/npm/flowbite@4.0.0/dist/flowbite.min.css" rel="stylesheet" />
+</head>
+<body class="min-h-screen bg-slate-950 text-gray-100 font-body">
+  <header class="border-b border-slate-800 bg-slate-950/80 sticky top-0 z-30 backdrop-blur">
+    <nav class="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
+      <div class="flex items-center gap-2">
+        <div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-xs font-semibold tracking-tight">
+          SL
+        </div>
+        <div>
+          <h1 class="text-lg font-semibold font-heading leading-tight">School Soccer League</h1>
+          <p class="text-xs text-muted">Match Details & Lineups</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 text-xs">
+        <a href="index.html" class="px-3 py-1.5 rounded-full border border-slate-700 hover:border-primary hover:text-primary transition-colors">
+          Back to Fixtures
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-6 space-y-6">
+    <!-- Match Summary -->
+    <section id="match-summary" class="bg-surface/60 border border-slate-800 rounded-2xl p-4 space-y-3">
+      <p id="match-status" class="text-xs text-muted">Loading match…</p>
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="flex-1 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div class="flex-1 text-center md:text-left">
+            <p id="home-team-name" class="text-sm font-semibold">Home</p>
+          </div>
+          <div class="flex items-center justify-center gap-2 text-2xl font-bold">
+            <span id="home-goals">-</span>
+            <span class="text-sm text-muted">vs</span>
+            <span id="away-goals">-</span>
+          </div>
+          <div class="flex-1 text-center md:text-right">
+            <p id="away-team-name" class="text-sm font-semibold">Away</p>
+          </div>
+        </div>
+      </div>
+      <p id="match-date" class="text-xs text-muted"></p>
+    </section>
+
+    <!-- Lineups -->
+    <section id="match-lineups" class="bg-surface/60 border border-slate-800 rounded-2xl p-4 space-y-4">
+      <h2 class="text-sm font-semibold uppercase tracking-wide text-muted">Lineups</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- Home lineup -->
+        <div>
+          <h3 id="home-lineup-title" class="text-sm font-semibold mb-2">Home Team</h3>
+          <div id="home-lineup" class="space-y-1 text-xs text-muted">
+            <p>Loading home lineup…</p>
+          </div>
+        </div>
+        <!-- Away lineup -->
+        <div>
+          <h3 id="away-lineup-title" class="text-sm font-semibold mb-2">Away Team</h3>
+          <div id="away-lineup" class="space-y-1 text-xs text-muted">
+            <p>Loading away lineup…</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+  <script>
+    Parse.initialize('6M8ibNOLPRIUzUixE1M5Krys1Bl5aKf8isZj1x2X', 'PcVwkrhcXvRACmtKzTRt8tsCf8mEuzPNXwD9zenq');
+    Parse.serverURL = 'https://parseapi.back4app.com/';
+
+    const Team = Parse.Object.extend('Team');
+    const Match = Parse.Object.extend('Match');
+    const Player = Parse.Object.extend('Player');
+
+    function getQueryParam(name) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(name);
+    }
+
+    async function loadMatchAndLineups() {
+      const matchId = getQueryParam('matchId');
+      if (!matchId) {
+        document.getElementById('match-status').textContent = 'No match selected.';
+        return;
+      }
+
+      const statusEl = document.getElementById('match-status');
+      const homeNameEl = document.getElementById('home-team-name');
+      const awayNameEl = document.getElementById('away-team-name');
+      const homeGoalsEl = document.getElementById('home-goals');
+      const awayGoalsEl = document.getElementById('away-goals');
+      const dateEl = document.getElementById('match-date');
+      const homeLineupEl = document.getElementById('home-lineup');
+      const awayLineupEl = document.getElementById('away-lineup');
+      const homeLineupTitle = document.getElementById('home-lineup-title');
+      const awayLineupTitle = document.getElementById('away-lineup-title');
+
+      statusEl.textContent = 'Loading match…';
+
+      try {
+        const query = new Parse.Query(Match);
+        query.include('homeTeam');
+        query.include('awayTeam');
+        const match = await query.get(matchId);
+
+        const homeTeam = match.get('homeTeam');
+        const awayTeam = match.get('awayTeam');
+        const homeName = homeTeam?.get('name') || 'Home';
+        const awayName = awayTeam?.get('name') || 'Away';
+
+        const homeGoals = match.get('homeGoals');
+        const awayGoals = match.get('awayGoals');
+        const status = match.get('status') || 'upcoming';
+        const date = match.get('matchDate') ? new Date(match.get('matchDate')).toLocaleString() : 'TBD';
+
+        homeNameEl.textContent = homeName;
+        awayNameEl.textContent = awayName;
+        homeGoalsEl.textContent = homeGoals != null ? homeGoals : '-';
+        awayGoalsEl.textContent = awayGoals != null ? awayGoals : '-';
+        dateEl.textContent = date;
+        statusEl.textContent = status === 'finished' ? 'Full Time' : status === 'upcoming' ? 'Scheduled' : status;
+
+        homeLineupTitle.textContent = homeName + ' Lineup';
+        awayLineupTitle.textContent = awayName + ' Lineup';
+
+        // Fetch players for each team (simple: all players with that team)
+        if (homeTeam) {
+          await loadLineupForTeam(homeTeam.id, homeLineupEl);
+        } else {
+          homeLineupEl.innerHTML = '<p>No home team set.</p>';
+        }
+        if (awayTeam) {
+          await loadLineupForTeam(awayTeam.id, awayLineupEl);
+        } else {
+          awayLineupEl.innerHTML = '<p>No away team set.</p>';
+        }
+      } catch (err) {
+        console.error('Error loading match details', err);
+        statusEl.textContent = 'Failed to load match.';
+      }
+    }
+
+    async function loadLineupForTeam(teamId, containerEl) {
+      containerEl.innerHTML = '<p>Loading…</p>';
+      try {
+        const team = new Team();
+        team.id = teamId;
+        const query = new Parse.Query(Player);
+        query.equalTo('team', team);
+        query.ascending('jerseyNumber');
+        const players = await query.find();
+
+        if (!players.length) {
+          containerEl.innerHTML = '<p>No lineup available.</p>';
+          return;
+        }
+
+        containerEl.innerHTML = players.map(p => {
+          const num = p.get('jerseyNumber');
+          const name = p.get('name') || 'Unnamed';
+          const pos = p.get('position') || '';
+          return `
+            <div class="flex items-center justify-between">
+              <span>${num != null ? '#' + num + ' ' : ''}${name}</span>
+              <span class="text-[11px] text-muted">${pos}</span>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error('Error loading lineup', err);
+        containerEl.innerHTML = '<p>Failed to load lineup.</p>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadMatchAndLineups();
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.0/dist/flowbite.min.js"></script>
+</body>
+</html>
