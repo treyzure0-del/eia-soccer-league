@@ -1124,51 +1124,57 @@
     }
 
     async function fetchMatches() {
-      const list = document.getElementById('matches-list');
-      const empty = document.getElementById('matches-empty');
-      list.innerHTML = '';
-      empty.classList.add('hidden');
+  const list = document.getElementById('matches-list');
+  const empty = document.getElementById('matches-empty');
+  list.innerHTML = '';
+  empty.classList.add('hidden');
 
-      try {
-        const query = new Parse.Query(Match);
-        query.include('homeTeam');
-        query.include('awayTeam');
-        query.descending('matchDate');
-        const results = await query.find();
+  try {
+    const query = new Parse.Query(Match);
+    query.include('homeTeam');
+    query.include('awayTeam');
+    query.descending('matchDate');
+    const results = await query.find();
 
-        if (!results.length) {
-          empty.classList.remove('hidden');
-          return;
-        }
-
-    list.innerHTML = results
-  .map(obj => {
-    const home = obj.get('homeTeam');
-    const away = obj.get('awayTeam');
-    const homeName = home?.get('name') || 'Home';
-    const awayName = away?.get('name') || 'Away';
-    const homeGoals = obj.get('homeGoals');
-    const awayGoals = obj.get('awayGoals');
-    const status = obj.get('status') || 'upcoming';
-    const date = obj.get('matchDate') ? new Date(obj.get('matchDate')).toLocaleDateString() : 'TBD';
-    const score = status === 'finished' ? `${homeGoals} - ${awayGoals}` : 'vs';
-    return `<button data-match-id="${obj.id}" class="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-slate-900/60 border border-slate-800 text-left hover:border-primary hover:bg-slate-900 transition-colors">
-      <div>
-        <p class="font-medium text-xs">${homeName} ${score} ${awayName}</p>
-        <p class="text-[11px] text-muted">${date} • ${status}</p>
-      </div>
-    </button>`;
-  })
-  .join('');
-
-        list.querySelectorAll('button[data-match-id]').forEach(btn => {
-          btn.addEventListener('click', () => loadMatchIntoForm(btn.getAttribute('data-match-id')));
-        });
-      } catch (err) {
-        console.error('Error loading matches', err);
-      }
+    if (!results.length) {
+      empty.classList.remove('hidden');
+      return;
     }
 
+    list.innerHTML = results
+      .map(obj => {
+        const home = obj.get('homeTeam');
+        const away = obj.get('awayTeam');
+        const homeName = home?.get('name') || 'Home';
+        const awayName = away?.get('name') || 'Away';
+        const homeGoals = obj.get('homeGoals');
+        const awayGoals = obj.get('awayGoals');
+        const status = obj.get('status') || 'upcoming';
+        const date = obj.get('matchDate')
+          ? new Date(obj.get('matchDate')).toLocaleDateString()
+          : 'TBD';
+        const score = status === 'finished' ? `${homeGoals} - ${awayGoals}` : 'vs';
+        return `<button data-match-id="${obj.id}" class="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-slate-900/60 border border-slate-800 text-left hover:border-primary hover:bg-slate-900 transition-colors">
+          <div>
+            <p class="font-medium text-xs">${homeName} ${score} ${awayName}</p>
+            <p class="text-[11px] text-muted">${date} • ${status}</p>
+          </div>
+        </button>`;
+      })
+      .join('');
+
+    // THIS is the click handler you are restoring:
+    list.querySelectorAll('button[data-match-id]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-match-id');
+        loadMatchIntoForm(id);   // loads match into the Admin 'Add / Edit Match' form
+      });
+    });
+  } catch (err) {
+    console.error('Error loading matches', err);
+    // you can optionally show an error message here if you want
+  }
+}
     async function loadMatchIntoForm(id) {
       const msg = document.getElementById('match-form-message');
       msg.textContent = '';
@@ -1476,6 +1482,7 @@
   <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.0/dist/flowbite.min.js"></script>
 </body>
 </html>
+
 
 
 
