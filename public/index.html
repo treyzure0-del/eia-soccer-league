@@ -1154,12 +1154,17 @@
           ? new Date(obj.get('matchDate')).toLocaleDateString()
           : 'TBD';
         const score = status === 'finished' ? `${homeGoals} - ${awayGoals}` : 'vs';
-        return `<button data-match-id="${obj.id}" class="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-slate-900/60 border border-slate-800 text-left hover:border-primary hover:bg-slate-900 transition-colors">
-          <div>
-            <p class="font-medium text-xs">${homeName} ${score} ${awayName}</p>
-            <p class="text-[11px] text-muted">${date} • ${status}</p>
-          </div>
-        </button>`;
+        return `
+  <a href="match.html?matchId=${matchId}"
+     class="w-full flex items-center justify-between px-3 py-2 rounded-lg
+            bg-slate-900/60 border border-slate-800 text-left
+            hover:border-primary hover:bg-slate-900 transition-colors">
+    <div>
+      <p class="font-medium text-xs">${homeName} ${score} ${awayName}</p>
+      <p class="text-[11px] text-muted">${date} • ${status}</p>
+    </div>
+  </a>
+`;
       })
       .join('');
 
@@ -1482,6 +1487,7 @@
   <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.0/dist/flowbite.min.js"></script>
 </body>
 </html>
+
 
 
 
