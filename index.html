@@ -1070,60 +1070,66 @@
       }
     }
 
-    async function saveMatch(event) {
-      event.preventDefault();
-      const msg = document.getElementById('match-form-message');
-      msg.textContent = 'Saving…';
+  async function saveMatch(event) {
+  event.preventDefault();
+  const msg = document.getElementById('match-form-message');
+  msg.textContent = 'Saving…';
 
-      const id = document.getElementById('match-id').value;
-      const homeId = document.getElementById('match-home').value;
-      const awayId = document.getElementById('match-away').value;
-      const homeGoals = Number(document.getElementById('match-home-goals').value) || 0;
-      const awayGoals = Number(document.getElementById('match-away-goals').value) || 0;
-      const date = document.getElementById('match-date').value;
-      const status = document.getElementById('match-status').value;
+  const id = document.getElementById('match-id').value;
+  const homeId = document.getElementById('match-home').value;
+  const awayId = document.getElementById('match-away').value;
+  const homeGoals = Number(document.getElementById('match-home-goals').value) || 0;
+  const awayGoals = Number(document.getElementById('match-away-goals').value) || 0;
+  const date = document.getElementById('match-date').value;
+  const status = document.getElementById('match-status').value;
 
-      if (!homeId || !awayId || homeId === awayId) {
-        msg.textContent = 'Please choose two different teams.';
-        return;
-      }
+  if (!homeId || !awayId || homeId === awayId) {
+    msg.textContent = 'Please choose two different teams.';
+    return;
+  }
 
-      try {
-        let matchObj;
-        if (id) {
-          const query = new Parse.Query(Match);
-          matchObj = await query.get(id);
-        } else {
-          matchObj = new Match();
-        }
-
-        const homeTeam = new Team();
-        homeTeam.id = homeId;
-        const awayTeam = new Team();
-        awayTeam.id = awayId;
-
-        matchObj.set('homeTeam', homeTeam);
-        matchObj.set('awayTeam', awayTeam);
-        matchObj.set('homeGoals', homeGoals);
-        matchObj.set('awayGoals', awayGoals);
-        matchObj.set('status', status);
-        if (date) matchObj.set('matchDate', new Date(date));
-
-        await matchObj.save();
-        msg.textContent = 'Match saved.';
-        document.getElementById('match-id').value = '';
-        document.getElementById('match-home-goals').value = 0;
-        document.getElementById('match-away-goals').value = 0;
-        document.getElementById('match-status').value = 'upcoming';
-        document.getElementById('match-delete-btn').classList.add('hidden');
-        await fetchMatches();
-      } catch (err) {
-        console.error('Error saving match', err);
-        msg.textContent = 'Failed to save match.';
-      }
+  try {
+    let matchObj;
+    if (id) {
+      const query = new Parse.Query(Match);
+      matchObj = await query.get(id);
+    } else {
+      matchObj = new Match();
     }
 
-    async function fetchMatches() {
+    const homeTeam = new Team();
+    homeTeam.id = homeId;
+    const awayTeam = new Team();
+    awayTeam.id = awayId;
+
+    matchObj.set('homeTeam', homeTeam);
+    matchObj.set('awayTeam', awayTeam);
+    matchObj.set('homeGoals', homeGoals);
+    matchObj.set('awayGoals', awayGoals);
+    matchObj.set('status', status);
+    if (date) matchObj.set('matchDate', new Date(date));
+
+    await matchObj.save();
+    msg.textContent = 'Match saved.';
+
+    // reset form
+    document.getElementById('match-id').value = '';
+    document.getElementById('match-home-goals').value = 0;
+    document.getElementById('match-away-goals').value = 0;
+    document.getElementById('match-date').value = '';
+    document.getElementById('match-status').value = 'upcoming';
+    document.getElementById('match-delete-btn').classList.add('hidden');
+
+    // refresh matches list for users
+    await fetchMatches();
+
+  } catch (err) {
+    console.error('Error saving match', err);
+    msg.textContent = 'Failed to save match.';
+  }
+}
+
+   async function fetchMatches() {
   const list = document.getElementById('matches-list');
   const empty = document.getElementById('matches-empty');
   list.innerHTML = '';
@@ -1155,7 +1161,6 @@
           : 'TBD';
         const score = status === 'finished' ? `${homeGoals} - ${awayGoals}` : 'vs';
 
-        // ORIGINAL: render each match as a button, not a link
         return `
           <button data-match-id="${obj.id}"
             class="w-full flex items-center justify-between px-3 py-2 rounded-lg
@@ -1170,21 +1175,15 @@
       })
       .join('');
 
-    // Click handler: load selected match into the Admin "Add / Edit Match" form
+    // Admin: click a match to load it into the Add / Edit Match form
     list.querySelectorAll('button[data-match-id]').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-match-id');
-        loadMatchIntoForm(id);   // this function already exists in your code
+        loadMatchIntoForm(id);
       });
     });
   } catch (err) {
     console.error('Error loading matches', err);
-    // optional: show error in matches-empty or another element
-  }
-}
-  } catch (err) {
-    console.error('Error loading matches', err);
-    // you can optionally show an error message here if you want
   }
 }
     async function loadMatchIntoForm(id) {
@@ -1494,6 +1493,7 @@
   <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.0/dist/flowbite.min.js"></script>
 </body>
 </html>
+
 
 
 
