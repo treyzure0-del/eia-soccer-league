@@ -1154,27 +1154,34 @@
           ? new Date(obj.get('matchDate')).toLocaleDateString()
           : 'TBD';
         const score = status === 'finished' ? `${homeGoals} - ${awayGoals}` : 'vs';
+
+        // ORIGINAL: render each match as a button, not a link
         return `
-  <a href="match.html?matchId=${matchId}"
-     class="w-full flex items-center justify-between px-3 py-2 rounded-lg
-            bg-slate-900/60 border border-slate-800 text-left
-            hover:border-primary hover:bg-slate-900 transition-colors">
-    <div>
-      <p class="font-medium text-xs">${homeName} ${score} ${awayName}</p>
-      <p class="text-[11px] text-muted">${date} • ${status}</p>
-    </div>
-  </a>
-`;
+          <button data-match-id="${obj.id}"
+            class="w-full flex items-center justify-between px-3 py-2 rounded-lg
+                   bg-slate-900/60 border border-slate-800 text-left
+                   hover:border-primary hover:bg-slate-900 transition-colors">
+            <div>
+              <p class="font-medium text-xs">${homeName} ${score} ${awayName}</p>
+              <p class="text-[11px] text-muted">${date} • ${status}</p>
+            </div>
+          </button>
+        `;
       })
       .join('');
 
-    // THIS is the click handler you are restoring:
+    // Click handler: load selected match into the Admin "Add / Edit Match" form
     list.querySelectorAll('button[data-match-id]').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-match-id');
-        loadMatchIntoForm(id);   // loads match into the Admin 'Add / Edit Match' form
+        loadMatchIntoForm(id);   // this function already exists in your code
       });
     });
+  } catch (err) {
+    console.error('Error loading matches', err);
+    // optional: show error in matches-empty or another element
+  }
+}
   } catch (err) {
     console.error('Error loading matches', err);
     // you can optionally show an error message here if you want
@@ -1487,6 +1494,7 @@
   <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.0/dist/flowbite.min.js"></script>
 </body>
 </html>
+
 
 
 
