@@ -1222,11 +1222,22 @@
       const prefix=isGirls?'g':'b';
       try {
         const q=new Parse.Query(Player);
-        const ptrs=teams.map(t=>{const obj=isGirls?new GirlsTeam():new Team();obj.id=t.id;return obj;});
-        q.containedIn('team',ptrs);q.limit(1000);
+        if(isGirls){
+          // Girls players are stored with girlsTeamId as a plain string
+          const teamIds=teams.map(t=>t.id);
+          q.containedIn('girlsTeamId', teamIds);
+        } else {
+          const ptrs=teams.map(t=>{const obj=new Team();obj.id=t.id;return obj;});
+          q.containedIn('team', ptrs);
+          q.equalTo('league','boys');
+        }
+        q.limit(1000);
         const rs=await q.find();
         const byTeam={};
-        rs.forEach(p=>{const tid=p.get('team')?.id;if(!tid)return;if(!byTeam[tid])byTeam[tid]=[];
+        rs.forEach(p=>{
+          const tid=isGirls?p.get('girlsTeamId'):p.get('team')?.id;
+          if(!tid)return;
+          if(!byTeam[tid])byTeam[tid]=[];
           byTeam[tid].push({id:p.id,name:p.get('name')||'Unnamed',number:p.get('jerseyNumber'),position:p.get('position')||'',league:isGirls?'girls':'boys'});
         });
         teams.forEach(t=>{
@@ -1235,12 +1246,12 @@
           c.innerHTML=pls.length?pls.map(p=>`<div class="flex items-center justify-between">
             <span>${p.number?'#'+p.number+' ':''}${p.name}</span><span>${p.position}</span></div>`).join(''):'<span>No players listed yet.</span>';
         });
-        if(!isGirls) {
+        if(!isGirls){
           _allPlayers=_allPlayers.filter(p=>p.league!=='boys');
-          rs.forEach(p=>{_allPlayers.push({parseObj:p,id:p.id,name:p.get('name')||'Unnamed',number:p.get('jerseyNumber'),position:p.get('position')||'',teamId:p.get('team')?.id,teamName:teams.find(t=>t.id===p.get('team')?.id)?.name||'',league:'boys'});});
+          rs.forEach(p=>{_allPlayers.push({id:p.id,name:p.get('name')||'Unnamed',number:p.get('jerseyNumber'),position:p.get('position')||'',teamId:p.get('team')?.id,teamName:teams.find(t=>t.id===p.get('team')?.id)?.name||'',league:'boys'});});
         } else {
           _allPlayers=_allPlayers.filter(p=>p.league!=='girls');
-          rs.forEach(p=>{_allPlayers.push({parseObj:p,id:p.id,name:p.get('name')||'Unnamed',number:p.get('jerseyNumber'),position:p.get('position')||'',teamId:p.get('team')?.id,teamName:teams.find(t=>t.id===p.get('team')?.id)?.name||'',league:'girls'});});
+          rs.forEach(p=>{_allPlayers.push({id:p.id,name:p.get('name')||'Unnamed',number:p.get('jerseyNumber'),position:p.get('position')||'',teamId:p.get('girlsTeamId'),teamName:p.get('girlsTeamName')||teams.find(t=>t.id===p.get('girlsTeamId'))?.name||'',league:'girls'});});
         }
         renderAdminPlayersList();
       } catch(e){console.error(e);}
@@ -1526,19 +1537,31 @@
         let o;if(id){o=await new Parse.Query(Player).get(id);}else o=new Player();
         o.set('name',name);
         if(number!==null) o.set('jerseyNumber',number);
+        else o.unset('jerseyNumber');
         o.set('position',position);
-        const team=league==='girls'?new GirlsTeam():new Team();team.id=teamId;
-        o.set('team',team);
         o.set('league',league);
+        if(league==='girls'){
+          // Store girls team as plain string ID — avoids pointer class mismatch in Back4App
+          o.set('girlsTeamId', teamId);
+          // Find team name from cache and store it too for display
+          const girlsTeamName=_girlsTeams.find(t=>t.id===teamId)?.name||'';
+          o.set('girlsTeamName', girlsTeamName);
+          // Unset boys team pointer to keep data clean
+          o.unset('team');
+        } else {
+          const t=new Team();t.id=teamId;
+          o.set('team',t);
+          o.unset('girlsTeamId');
+          o.unset('girlsTeamName');
+        }
         await o.save();
         msg.textContent=id?'Player updated.':'Player added.';
         resetPlayerForm();await fetchTeams();await fetchGirlsTeams();
-      } catch(e){console.error(e);msg.textContent='Failed.';}
+      } catch(err){console.error(err);msg.textContent='Failed: '+err.message;}
     }
     async function loadPlayerIntoForm(id) {
       try {
-        const q=new Parse.Query(Player);q.include('team');
-        const o=await q.get(id);
+        const o=await new Parse.Query(Player).get(id);
         document.getElementById('player-id').value=o.id;
         document.getElementById('player-name').value=o.get('name')||'';
         document.getElementById('player-number').value=o.get('jerseyNumber')??'';
@@ -1546,7 +1569,8 @@
         const league=o.get('league')||'boys';
         document.getElementById('player-league').value=league;
         updatePlayerTeamOptions();
-        setTimeout(()=>document.getElementById('player-team').value=o.get('team')?.id||'',100);
+        const teamId=league==='girls'?o.get('girlsTeamId'):o.get('team')?.id;
+        setTimeout(()=>{document.getElementById('player-team').value=teamId||'';},150);
         document.getElementById('player-delete-btn').classList.remove('hidden');
         document.getElementById('player-form-message').textContent='Editing player.';
         document.getElementById('player-form').scrollIntoView({behavior:'smooth'});
