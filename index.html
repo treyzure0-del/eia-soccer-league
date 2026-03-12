@@ -312,7 +312,7 @@
       max-width: 1152px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
     }
 
     .icon-card {
@@ -441,10 +441,19 @@
     <nav class="max-w-6xl mx-auto flex items-center justify-between px-4 py-3 gap-3">
       <div class="flex items-center gap-2 shrink-0">
         <div id="site-logo-circle"
-          class="w-11 h-11 rounded-full flex items-center justify-center text-xs font-bold overflow-hidden"
-          style="background:linear-gradient(135deg, var(--lime) 0%, var(--orange) 100%);box-shadow:0 0 18px rgba(184,212,0,0.35);">
-          <span id="site-logo-initials"
-            style="font-family:'Barlow+Condensed',sans-serif;font-size:16px;font-weight:900;color:var(--navy);">EIA</span>
+          class="w-12 h-12 rounded-full flex items-center justify-center text-xs font-bold overflow-hidden"
+          style="background:linear-gradient(135deg, var(--lime) 0%, var(--orange) 100%);box-shadow:0 0 20px rgba(184,212,0,0.4);">
+          <svg id="site-logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="w-10 h-10">
+            <!-- Shield background -->
+            <path d="M50 10 L80 25 L80 50 Q80 75 50 85 Q20 75 20 50 L20 25 Z" fill="var(--navy)" stroke="var(--navy)"
+              stroke-width="1" />
+            <!-- Football -->
+            <ellipse cx="50" cy="50" rx="18" ry="12" fill="var(--orange)" opacity="0.9" />
+            <line x1="50" y1="38" x2="50" y2="62" stroke="var(--navy)" stroke-width="1.5" opacity="0.6" />
+            <!-- EIA text -->
+            <text x="50" y="77" font-family="Barlow Condensed, sans-serif" font-size="10" font-weight="900"
+              fill="var(--lime)" text-anchor="middle" letter-spacing="1">EIA</text>
+          </svg>
           <img id="site-logo-image" src="" alt="League logo" class="hidden w-full h-full object-cover" />
         </div>
         <div>
@@ -487,7 +496,7 @@
       <h2 class="hero-title">EIA <span>Football</span><br />League</h2>
       <p class="hero-sub">Live standings, results &amp; player statistics for both boys &amp; girls leagues — updated
         every matchday. Real-time updates, team transfers &amp; player achievements.</p>
-      <button class="hero-cta" onclick="document.getElementById('section-table').scrollIntoView({behavior:'smooth'})">📊
+      <button class="hero-cta" onclick="document.getElementById('section-table').scrollIntoView({behavior:'smooth'})">▬
         View League Table</button>
       <div style="height:32px"></div>
     </div>
@@ -495,39 +504,51 @@
     <div class="icon-nav-bar w-full">
       <div class="icon-nav-inner">
         <button class="icon-card active" id="nav-table">
-          <div class="icon-card-icon">🏆</div>
+          <div class="icon-card-icon">◆</div>
           <div class="icon-card-title">League Table</div>
           <div class="icon-card-sub">Standings &amp; points</div>
           <div class="icon-card-details">Details</div>
         </button>
         <button class="icon-card" id="nav-matches">
-          <div class="icon-card-icon">📅</div>
+          <div class="icon-card-icon">◈</div>
           <div class="icon-card-title">Matches</div>
           <div class="icon-card-sub">Fixtures &amp; results</div>
           <div class="icon-card-details">Details</div>
         </button>
         <button class="icon-card" id="nav-players">
-          <div class="icon-card-icon">👕</div>
+          <div class="icon-card-icon">◉</div>
           <div class="icon-card-title">Teams &amp; Players</div>
           <div class="icon-card-sub">Squads &amp; rosters</div>
           <div class="icon-card-details">Details</div>
         </button>
         <button class="icon-card" id="nav-achievements">
-          <div class="icon-card-icon">🥇</div>
+          <div class="icon-card-icon">⬢</div>
           <div class="icon-card-title">Achievements</div>
           <div class="icon-card-sub">Player honours</div>
           <div class="icon-card-details">Details</div>
         </button>
         <button class="icon-card" id="nav-transfers">
-          <div class="icon-card-icon">🔄</div>
+          <div class="icon-card-icon">⇄</div>
           <div class="icon-card-title">Transfers</div>
           <div class="icon-card-sub">Player movement</div>
           <div class="icon-card-details">Details</div>
         </button>
         <button class="icon-card" id="nav-captain">
-          <div class="icon-card-icon">⚡</div>
+          <div class="icon-card-icon">▲</div>
           <div class="icon-card-title">Captain Portal</div>
           <div class="icon-card-sub">Team management</div>
+          <div class="icon-card-details">Details</div>
+        </button>
+        <button class="icon-card" id="nav-news">
+          <div class="icon-card-icon">▬</div>
+          <div class="icon-card-title">News</div>
+          <div class="icon-card-sub">League updates</div>
+          <div class="icon-card-details">Details</div>
+        </button>
+        <button class="icon-card" id="nav-stats">
+          <div class="icon-card-icon">▥</div>
+          <div class="icon-card-title">Top Scorers</div>
+          <div class="icon-card-sub">Player stats</div>
           <div class="icon-card-details">Details</div>
         </button>
       </div>
@@ -535,6 +556,26 @@
   </div>
 
   <main class="max-w-6xl mx-auto px-4 py-6 space-y-6 relative z-10">
+
+    <!-- LEAGUE SUMMARY CARDS -->
+    <div id="league-summary" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div class="border border-slate-700 rounded-lg px-4 py-3 bg-slate-900/40 text-center">
+        <div class="text-[10px] uppercase tracking-wide text-muted">Teams</div>
+        <div id="summary-teams-count" class="text-2xl font-bold text-lime mt-1">0</div>
+      </div>
+      <div class="border border-slate-700 rounded-lg px-4 py-3 bg-slate-900/40 text-center">
+        <div class="text-[10px] uppercase tracking-wide text-muted">Matches</div>
+        <div id="summary-matches-count" class="text-2xl font-bold text-lime mt-1">0</div>
+      </div>
+      <div class="border border-slate-700 rounded-lg px-4 py-3 bg-slate-900/40 text-center">
+        <div class="text-[10px] uppercase tracking-wide text-muted">Total Goals</div>
+        <div id="summary-goals-count" class="text-2xl font-bold text-lime mt-1">0</div>
+      </div>
+      <div class="border border-slate-700 rounded-lg px-4 py-3 bg-slate-900/40 text-center">
+        <div class="text-[10px] uppercase tracking-wide text-muted">Top Scorer</div>
+        <div id="summary-top-scorer" class="text-xs font-bold text-lime mt-1 truncate">—</div>
+      </div>
+    </div>
 
     <!-- TABLE -->
     <section id="section-table" class="space-y-6">
@@ -556,7 +597,7 @@
       <div class="space-y-2">
         <div class="league-header-boys flex items-center gap-2"><span
             class="text-base font-heading font-bold uppercase tracking-wide">Boys League</span><span
-            class="badge-boys">⚽ Boys</span></div>
+            class="badge-boys">● Boys</span></div>
         <section class="border card-boys rounded-xl shadow-lg overflow-hidden" style="background:rgba(20,20,20,.8)">
           <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
@@ -590,7 +631,7 @@
       <div class="space-y-2">
         <div class="league-header-girls flex items-center gap-2"><span
             class="text-base font-heading font-bold uppercase tracking-wide">Girls League</span><span
-            class="badge-girls">🌸 Girls</span></div>
+            class="badge-girls">◆ Girls</span></div>
         <section class="border card-girls rounded-xl shadow-lg overflow-hidden" style="background:rgba(20,20,20,.8)">
           <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
@@ -638,25 +679,45 @@
         <p class="text-xs text-muted">Fixtures &amp; results for both leagues.</p>
       </div>
       <div class="flex gap-2">
-        <button class="tab-btn tab-btn-boys active" id="matches-tab-boys" onclick="switchMatchTab('boys')">⚽
+        <button class="tab-btn tab-btn-boys active" id="matches-tab-boys" onclick="switchMatchTab('boys')">●
           Boys</button>
-        <button class="tab-btn tab-btn-girls" id="matches-tab-girls" onclick="switchMatchTab('girls')">🌸 Girls</button>
+        <button class="tab-btn tab-btn-girls" id="matches-tab-girls" onclick="switchMatchTab('girls')">◆ Girls</button>
       </div>
-      <div id="matches-boys-panel" class="space-y-2">
-        <div class="league-header-boys"><span class="text-sm font-heading font-bold uppercase tracking-wide">Boys
-            Fixtures &amp; Results</span></div>
-        <section class="border card-boys rounded-xl p-4 space-y-2" style="background:rgba(20,20,20,.8)">
-          <div id="matches-list" class="space-y-2 text-xs"></div>
-          <div id="matches-empty" class="hidden text-xs text-muted">No boys matches yet.</div>
-        </section>
+      <div id="matches-boys-panel" class="space-y-4">
+        <div>
+          <div class="league-header-boys mb-2"><span class="text-sm font-heading font-bold uppercase tracking-wide">▷
+              Upcoming Fixtures</span></div>
+          <section class="border card-boys rounded-xl p-4 space-y-2" style="background:rgba(20,20,20,.8)">
+            <div id="matches-upcoming-list" class="space-y-2 text-xs"></div>
+            <div id="matches-upcoming-empty" class="hidden text-xs text-muted">No upcoming boys matches.</div>
+          </section>
+        </div>
+        <div>
+          <div class="league-header-boys mb-2"><span class="text-sm font-heading font-bold uppercase tracking-wide">✓
+              Match Results</span></div>
+          <section class="border card-boys rounded-xl p-4 space-y-2" style="background:rgba(20,20,20,.8)">
+            <div id="matches-results-list" class="space-y-2 text-xs"></div>
+            <div id="matches-results-empty" class="hidden text-xs text-muted">No completed boys matches.</div>
+          </section>
+        </div>
       </div>
-      <div id="matches-girls-panel" class="space-y-2 hidden">
-        <div class="league-header-girls"><span class="text-sm font-heading font-bold uppercase tracking-wide">Girls
-            Fixtures &amp; Results</span></div>
-        <section class="border card-girls rounded-xl p-4 space-y-2" style="background:rgba(20,20,20,.8)">
-          <div id="girls-matches-list" class="space-y-2 text-xs"></div>
-          <div id="girls-matches-empty" class="hidden text-xs text-muted">No girls matches yet.</div>
-        </section>
+      <div id="matches-girls-panel" class="space-y-4 hidden">
+        <div>
+          <div class="league-header-girls mb-2"><span class="text-sm font-heading font-bold uppercase tracking-wide">▷
+              Upcoming Fixtures</span></div>
+          <section class="border card-girls rounded-xl p-4 space-y-2" style="background:rgba(20,20,20,.8)">
+            <div id="girls-matches-upcoming-list" class="space-y-2 text-xs"></div>
+            <div id="girls-matches-upcoming-empty" class="hidden text-xs text-muted">No upcoming girls matches.</div>
+          </section>
+        </div>
+        <div>
+          <div class="league-header-girls mb-2"><span class="text-sm font-heading font-bold uppercase tracking-wide">✓
+              Match Results</span></div>
+          <section class="border card-girls rounded-xl p-4 space-y-2" style="background:rgba(20,20,20,.8)">
+            <div id="girls-matches-results-list" class="space-y-2 text-xs"></div>
+            <div id="girls-matches-results-empty" class="hidden text-xs text-muted">No completed girls matches.</div>
+          </section>
+        </div>
       </div>
     </section>
 
@@ -667,9 +728,9 @@
         <p class="text-xs text-muted">Browse squads by league.</p>
       </div>
       <div class="flex gap-2">
-        <button class="tab-btn tab-btn-boys active" id="players-tab-boys" onclick="switchPlayersTab('boys')">⚽
+        <button class="tab-btn tab-btn-boys active" id="players-tab-boys" onclick="switchPlayersTab('boys')">●
           Boys</button>
-        <button class="tab-btn tab-btn-girls" id="players-tab-girls" onclick="switchPlayersTab('girls')">🌸
+        <button class="tab-btn tab-btn-girls" id="players-tab-girls" onclick="switchPlayersTab('girls')">◆
           Girls</button>
       </div>
       <div id="players-boys-panel">
@@ -697,8 +758,8 @@
         <p class="text-xs text-muted">Player awards &amp; match honours.</p>
       </div>
       <div class="flex gap-2">
-        <button class="tab-btn tab-btn-boys active" id="ach-tab-boys" onclick="switchAchTab('boys')">⚽ Boys</button>
-        <button class="tab-btn tab-btn-girls" id="ach-tab-girls" onclick="switchAchTab('girls')">🌸 Girls</button>
+        <button class="tab-btn tab-btn-boys active" id="ach-tab-boys" onclick="switchAchTab('boys')">● Boys</button>
+        <button class="tab-btn tab-btn-girls" id="ach-tab-girls" onclick="switchAchTab('girls')">◆ Girls</button>
       </div>
       <div id="ach-boys-panel">
         <div class="league-header-boys mb-2"><span class="text-sm font-heading font-bold uppercase tracking-wide">Boys
@@ -727,8 +788,8 @@
         <p class="text-xs text-muted">Player movement between teams.</p>
       </div>
       <div class="flex gap-2">
-        <button class="tab-btn tab-btn-boys active" id="tr-tab-boys" onclick="switchTransferTab('boys')">⚽ Boys</button>
-        <button class="tab-btn tab-btn-girls" id="tr-tab-girls" onclick="switchTransferTab('girls')">🌸 Girls</button>
+        <button class="tab-btn tab-btn-boys active" id="tr-tab-boys" onclick="switchTransferTab('boys')">● Boys</button>
+        <button class="tab-btn tab-btn-girls" id="tr-tab-girls" onclick="switchTransferTab('girls')">◆ Girls</button>
       </div>
       <div id="tr-boys-panel">
         <div class="league-header-boys mb-2"><span class="text-sm font-heading font-bold uppercase tracking-wide">Boys
@@ -747,6 +808,69 @@
           <div id="girls-transfers-empty" class="hidden text-xs text-muted">No girls transfers recorded yet.</div>
           <div id="girls-transfers-loading" class="text-xs text-muted">Loading…</div>
         </section>
+      </div>
+    </section>
+
+    <!-- NEWS SECTION -->
+    <section id="section-news" class="space-y-4 hidden">
+      <div class="flex items-center justify-between gap-2">
+        <h2 class="text-xl md:text-2xl font-heading font-bold uppercase tracking-wide">▬ League News</h2>
+        <p class="text-xs text-muted">Latest updates &amp; announcements.</p>
+      </div>
+      <section class="border border-slate-800 rounded-xl p-4 space-y-3"
+        style="background:rgba(20,20,20,.8);border-left:3px solid var(--lime);">
+        <div id="news-list" class="space-y-3"></div>
+        <div id="news-empty" class="hidden text-xs text-muted text-center py-6">No news published yet.</div>
+      </section>
+    </section>
+
+    <!-- STATS SECTION -->
+    <section id="section-stats" class="space-y-4 hidden">
+      <div class="flex items-center justify-between gap-2">
+        <h2 class="text-xl md:text-2xl font-heading font-bold uppercase tracking-wide">◆ Player Statistics</h2>
+        <p class="text-xs text-muted">Top performers this season.</p>
+      </div>
+      <div class="flex gap-2">
+        <button class="tab-btn tab-btn-boys active" id="stats-tab-boys" onclick="switchStatsTab('boys')">● Boys</button>
+        <button class="tab-btn tab-btn-girls" id="stats-tab-girls" onclick="switchStatsTab('girls')">◊ Girls</button>
+      </div>
+      <div id="stats-boys-panel" class="space-y-4">
+        <div class="grid md:grid-cols-3 gap-3">
+          <div class="border border-slate-800 rounded-xl p-4"
+            style="background:rgba(20,20,20,.8);border-left:3px solid #fbbf24;">
+            <p class="text-xs text-muted uppercase tracking-wide">Top Scorers</p>
+            <div id="stats-boys-goals" class="space-y-2 mt-3 text-xs"></div>
+          </div>
+          <div class="border border-slate-800 rounded-xl p-4"
+            style="background:rgba(20,20,20,.8);border-left:3px solid #60a5fa;">
+            <p class="text-xs text-muted uppercase tracking-wide">Assists</p>
+            <div id="stats-boys-assists" class="space-y-2 mt-3 text-xs"></div>
+          </div>
+          <div class="border border-slate-800 rounded-xl p-4"
+            style="background:rgba(20,20,20,.8);border-left:3px solid #a78bfa;">
+            <p class="text-xs text-muted uppercase tracking-wide">Most Appearances</p>
+            <div id="stats-boys-appearances" class="space-y-2 mt-3 text-xs"></div>
+          </div>
+        </div>
+      </div>
+      <div id="stats-girls-panel" class="hidden space-y-4">
+        <div class="grid md:grid-cols-3 gap-3">
+          <div class="border border-slate-800 rounded-xl p-4"
+            style="background:rgba(20,20,20,.8);border-left:3px solid #fbbf24;">
+            <p class="text-xs text-muted uppercase tracking-wide">Top Scorers</p>
+            <div id="stats-girls-goals" class="space-y-2 mt-3 text-xs"></div>
+          </div>
+          <div class="border border-slate-800 rounded-xl p-4"
+            style="background:rgba(20,20,20,.8);border-left:3px solid #60a5fa;">
+            <p class="text-xs text-muted uppercase tracking-wide">Assists</p>
+            <div id="stats-girls-assists" class="space-y-2 mt-3 text-xs"></div>
+          </div>
+          <div class="border border-slate-800 rounded-xl p-4"
+            style="background:rgba(20,20,20,.8);border-left:3px solid #a78bfa;">
+            <p class="text-xs text-muted uppercase tracking-wide">Most Appearances</p>
+            <div id="stats-girls-appearances" class="space-y-2 mt-3 text-xs"></div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -829,8 +953,40 @@
       </div>
 
       <div class="space-y-1">
+        <div class="league-header-boys py-1"><span class="text-sm font-heading font-bold uppercase tracking-wide">News
+            Management</span> <span class="badge-boys ml-2">◈ News</span></div>
+      </div>
+      <div class="grid gap-4 md:grid-cols-2">
+        <div class="border card-boys rounded-xl p-4 space-y-3" style="background:rgba(20,20,20,.8)">
+          <h4 class="text-sm font-heading font-bold uppercase tracking-wide text-muted">Add / Edit News</h4>
+          <form id="news-form" class="space-y-3">
+            <input type="hidden" id="news-id" />
+            <div><label class="block text-xs mb-1">Title</label><input id="news-title" type="text" required
+                class="w-full rounded-lg bg-slate-900 border border-slate-700 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
+            </div>
+            <div><label class="block text-xs mb-1">Content</label><textarea id="news-content" required
+                class="w-full rounded-lg bg-slate-900 border border-slate-700 text-sm px-3 py-2 h-24 focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
+            </div>
+            <div class="flex gap-2"><button type="submit"
+                class="flex-1 bg-primary text-white rounded-lg px-4 py-2 text-xs font-bold hover:opacity-90">Save
+                News</button><button type="button" id="news-delete-btn"
+                class="flex-1 bg-red-900 text-white rounded-lg px-4 py-2 text-xs font-bold hover:opacity-90">Delete</button><button
+                type="button" id="news-reset-btn" class="text-xs text-muted hover:text-gray-300">Clear</button></div>
+          </form>
+          <p id="news-form-message" class="text-xs text-muted"></p>
+        </div>
+        <div class="border card-boys rounded-xl p-4 space-y-3" style="background:rgba(20,20,20,.8)">
+          <div class="flex items-center justify-between">
+            <h5 class="text-xs font-heading font-bold uppercase tracking-wide text-muted">Existing News</h5>
+            <p class="text-[11px] text-muted">Tap to edit.</p>
+          </div>
+          <div id="admin-news-list" class="space-y-1 max-h-48 overflow-y-auto text-xs"></div>
+        </div>
+      </div>
+
+      <div class="space-y-1">
         <div class="league-header-boys py-1"><span class="text-sm font-heading font-bold uppercase tracking-wide">Boys
-            Team Management</span> <span class="badge-boys ml-2">⚽ Boys</span></div>
+            Team Management</span> <span class="badge-boys ml-2">◆ Boys</span></div>
       </div>
       <div class="grid gap-4 md:grid-cols-2">
         <div class="border card-boys rounded-xl p-4 space-y-3" style="background:rgba(20,20,20,.8)">
@@ -887,7 +1043,7 @@
 
       <div class="space-y-1">
         <div class="league-header-girls py-1"><span class="text-sm font-heading font-bold uppercase tracking-wide">Girls
-            Team Management</span> <span class="badge-girls ml-2">🌸 Girls</span></div>
+            Team Management</span> <span class="badge-girls ml-2">◊ Girls</span></div>
       </div>
       <div class="grid gap-4 md:grid-cols-2">
         <div class="border card-girls rounded-xl p-4 space-y-3" style="background:rgba(20,20,20,.8)">
@@ -983,7 +1139,7 @@
       </div>
 
       <div class="league-header-girls py-1"><span class="text-sm font-heading font-bold uppercase tracking-wide">Girls
-          Match Management</span> <span class="badge-girls ml-2">🌸 Girls</span></div>
+          Match Management</span> <span class="badge-girls ml-2">◊ Girls</span></div>
       <div class="border card-girls rounded-xl p-4 space-y-3" style="background:rgba(20,20,20,.8)">
         <h4 class="text-sm font-heading font-bold uppercase tracking-wide text-muted">Add / Edit Girls Match</h4>
         <form id="girls-match-form" class="space-y-3">
@@ -1041,7 +1197,7 @@
                 class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5"
                 onchange="updatePlayerTeamOptions()">
                 <option value="boys">⚽ Boys</option>
-                <option value="girls">🌸 Girls</option>
+                <option value="girls">◊ Girls</option>
               </select></div>
             <div><label class="block mb-1">Team</label><select id="player-team"
                 class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5"></select></div>
@@ -1069,7 +1225,7 @@
               onchange="renderAdminPlayersList()">
               <option value="">All Leagues</option>
               <option value="boys">⚽ Boys</option>
-              <option value="girls">🌸 Girls</option>
+              <option value="girls">◊ Girls</option>
             </select>
             <select id="admin-player-filter-team"
               class="flex-1 rounded-lg bg-slate-900 border border-slate-700 px-2 py-1 text-xs"
@@ -1135,7 +1291,7 @@
       </div>
 
       <div class="league-header-girls py-1"><span class="text-sm font-heading font-bold uppercase tracking-wide">Girls
-          Achievement Management</span> <span class="badge-girls ml-2">🌸 Girls</span></div>
+          Achievement Management</span> <span class="badge-girls ml-2">◊ Girls</span></div>
       <div class="border card-girls rounded-xl p-4 space-y-3" style="background:rgba(20,20,20,.8)">
         <h4 class="text-sm font-heading font-bold uppercase tracking-wide text-muted">Award Girls Achievement</h4>
         <form id="girls-achievement-form" class="space-y-3">
@@ -1230,7 +1386,7 @@
       </div>
 
       <div class="league-header-girls py-1"><span class="text-sm font-heading font-bold uppercase tracking-wide">Girls
-          Transfer Management</span> <span class="badge-girls ml-2">🌸 Girls</span></div>
+          Transfer Management</span> <span class="badge-girls ml-2">◊ Girls</span></div>
       <div class="border card-girls rounded-xl p-4 space-y-3" style="background:rgba(20,20,20,.8)">
         <h4 class="text-sm font-heading font-bold uppercase tracking-wide text-muted">Record Girls Transfer</h4>
         <form id="girls-transfer-form" class="space-y-3">
@@ -1281,7 +1437,7 @@
           <div class="flex gap-2 flex-wrap">
             <button class="tab-btn tab-btn-boys active text-xs" id="budget-tab-boys" onclick="switchBudgetTab('boys')">⚽
               Boys</button>
-            <button class="tab-btn tab-btn-girls text-xs" id="budget-tab-girls" onclick="switchBudgetTab('girls')">🌸
+            <button class="tab-btn tab-btn-girls text-xs" id="budget-tab-girls" onclick="switchBudgetTab('girls')">◊
               Girls</button>
           </div>
           <div id="budget-boys-panel" class="space-y-3">
@@ -1305,7 +1461,7 @@
         <div class="flex gap-2 flex-wrap">
           <button class="tab-btn tab-btn-boys active text-xs" id="captcode-tab-boys"
             onclick="switchCaptCodeTab('boys')">⚽ Boys</button>
-          <button class="tab-btn tab-btn-girls text-xs" id="captcode-tab-girls" onclick="switchCaptCodeTab('girls')">🌸
+          <button class="tab-btn tab-btn-girls text-xs" id="captcode-tab-girls" onclick="switchCaptCodeTab('girls')">◊
             Girls</button>
         </div>
         <div id="captcode-boys-panel" class="space-y-2">
@@ -1436,6 +1592,46 @@
     <span id="theme-toggle-label">Dark</span>
   </button>
 
+  <!-- PLAYER PROFILE MODAL -->
+  <div id="player-profile-modal"
+    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-full bg-black/70">
+    <div class="relative p-4 w-full max-w-md max-h-full">
+      <div class="relative rounded-xl shadow border border-slate-800"
+        style="background:#111;border-top:3px solid var(--lime);">
+        <button type="button" id="close-player-modal"
+          class="absolute top-3 right-3 text-muted hover:text-white bg-slate-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+          ✕
+        </button>
+        <div class="p-6 space-y-4">
+          <div class="text-center">
+            <div id="player-profile-number" class="text-4xl font-bold text-lime">#00</div>
+            <h2 id="player-profile-name" class="text-xl font-heading font-bold mt-2">Player Name</h2>
+            <p id="player-profile-team" class="text-xs text-muted mt-1">Team Name</p>
+            <p id="player-profile-position" class="text-xs text-muted">Position</p>
+          </div>
+          <div class="grid grid-cols-3 gap-2 pt-4 border-t border-slate-800">
+            <div class="text-center">
+              <div class="text-2xl font-bold text-lime" id="player-profile-goals">0</div>
+              <p class="text-xs text-muted">Goals</p>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-lime" id="player-profile-assists">0</div>
+              <p class="text-xs text-muted">Assists</p>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-lime" id="player-profile-appearances">0</div>
+              <p class="text-xs text-muted">Apps</p>
+            </div>
+          </div>
+          <div id="player-profile-achievements" class="pt-4 border-t border-slate-800 space-y-2">
+            <h3 class="text-xs font-bold text-muted uppercase">Achievements</h3>
+            <div id="player-achievements-list" class="text-xs space-y-1"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="admin-login-modal"
     class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-full bg-black/70">
     <div class="relative p-4 w-full max-w-sm">
@@ -1477,6 +1673,7 @@
     const Match = Parse.Object.extend('Match');
     const Player = Parse.Object.extend('Player');
     const Announcement = Parse.Object.extend('Announcement');
+    const News = Parse.Object.extend('News');
     const Achievement = Parse.Object.extend('Achievement');
     const GirlsAchievement = Parse.Object.extend('GirlsAchievement');
     const Transfer = Parse.Object.extend('Transfer');
@@ -1496,8 +1693,8 @@
       return codes.map(x => `<span class="w-2.5 h-2.5 rounded-full ${c[x]} inline-block mr-0.5"></span>`).join('');
     }
     function achIcon(type) {
-      const m = { 'Best Player of the Match': '🌟', 'Top Scorer': '⚽', 'Best Goalkeeper': '🧤', 'Best Defender': '🛡️', 'Best Midfielder': '🎯', 'Most Improved Player': '📈', 'Fair Play Award': '🤝', 'Golden Boot': '👟', 'Golden Glove': '🥇', 'Player of the Season': '🏆' };
-      return m[type] || '🏅';
+      const m = { 'Best Player of the Match': '★', 'Top Scorer': '◆', 'Best Goalkeeper': '◇', 'Best Defender': '▲', 'Best Midfielder': '◯', 'Most Improved Player': '▬', 'Fair Play Award': '◆', 'Golden Boot': '▲', 'Golden Glove': '◆', 'Player of the Season': '☆' };
+      return m[type] || '◈';
     }
 
     const THEMES = {
@@ -1553,6 +1750,14 @@
       document.getElementById('tr-girls-panel').classList.toggle('hidden', league !== 'girls');
       document.getElementById('tr-tab-boys').classList.toggle('active', league === 'boys');
       document.getElementById('tr-tab-girls').classList.toggle('active', league === 'girls');
+    }
+    function switchStatsTab(league) {
+      document.getElementById('stats-boys-panel').classList.toggle('hidden', league !== 'boys');
+      document.getElementById('stats-girls-panel').classList.toggle('hidden', league !== 'girls');
+      document.getElementById('stats-tab-boys').classList.toggle('active', league === 'boys');
+      document.getElementById('stats-tab-girls').classList.toggle('active', league === 'girls');
+      if (league === 'boys') fetchPlayerStats('boys');
+      else fetchPlayerStats('girls');
     }
 
     function applyBackgroundFromConfig(config) {
@@ -1628,6 +1833,78 @@
       const id = document.getElementById('announcement-id').value; const msg = document.getElementById('announcement-form-message');
       if (!id) { msg.textContent = 'Select one first.'; return; } if (!confirm('Delete this announcement?')) return;
       try { const o = await new Parse.Query(Announcement).get(id); await o.destroy(); msg.textContent = 'Deleted.'; resetAnnouncementForm(); await fetchAnnouncements(); } catch (e) { console.error(e); msg.textContent = 'Failed.'; }
+    }
+
+    async function fetchNews() {
+      const list = document.getElementById('news-list'), empty = document.getElementById('news-empty');
+      list.innerHTML = ''; empty.classList.add('hidden');
+      try {
+        const q = new Parse.Query(News); q.descending('createdAt'); q.limit(50);
+        const rs = await q.find();
+        if (!rs.length) { empty.classList.remove('hidden'); populateAdminNewsList([]); return; }
+        list.innerHTML = rs.map(o => `<article class="border-l-4 border-lime px-4 py-3 rounded-r bg-slate-900/40"><h3 class="text-sm font-heading font-bold text-lime">${o.get('title') || 'News'}</h3><p class="text-xs text-text mt-2">${o.get('content') || ''}</p><p class="text-[10px] text-muted mt-2">${o.get('createdAt') ? new Date(o.get('createdAt')).toLocaleDateString() : ''}</p></article>`).join('');
+        populateAdminNewsList(rs);
+      } catch (e) { console.error(e); empty.classList.remove('hidden'); }
+    }
+
+    async function fetchPlayerStats(league) {
+      const isGirls = league === 'girls';
+      const q = new Parse.Query(Player); q.equalTo('league', league); q.limit(1000);
+      let players = [];
+      try { players = await q.find(); } catch (e) { console.error(e); return; }
+
+      const goalscorers = players.sort((a, b) => (b.get('goals') || 0) - (a.get('goals') || 0)).slice(0, 10);
+      const assists = players.sort((a, b) => (b.get('assists') || 0) - (a.get('assists') || 0)).slice(0, 10);
+      const appearances = players.sort((a, b) => (b.get('appearances') || 0) - (a.get('appearances') || 0)).slice(0, 10);
+
+      const prefix = isGirls ? 'stats-girls-' : 'stats-boys-';
+      document.getElementById(prefix + 'goals').innerHTML = goalscorers.map((p, i) => `<div class="flex justify-between"><span><strong>${i + 1}.</strong> ${p.get('name')}</span><span class="text-lime font-bold">${p.get('goals') || 0}</span></div>`).join('') || '<p class="text-muted text-xs">No data</p>';
+      document.getElementById(prefix + 'assists').innerHTML = assists.map((p, i) => `<div class="flex justify-between"><span><strong>${i + 1}.</strong> ${p.get('name')}</span><span class="text-lime font-bold">${p.get('assists') || 0}</span></div>`).join('') || '<p class="text-muted text-xs">No data</p>';
+      document.getElementById(prefix + 'appearances').innerHTML = appearances.map((p, i) => `<div class="flex justify-between"><span><strong>${i + 1}.</strong> ${p.get('name')}</span><span class="text-lime font-bold">${p.get('appearances') || 0}</span></div>`).join('') || '<p class="text-muted text-xs">No data</p>';
+    }
+
+    async function updateLeagueSummaryCards() {
+      try {
+        const boysTeams = await new Parse.Query(Team).find();
+        const girlsTeams = await new Parse.Query(GirlsTeam).find();
+        const boysMatches = await new Parse.Query(Match).find();
+        const girlsMatches = await new Parse.Query(GirlsMatch).find();
+        const allPlayers = await new Parse.Query(Player).find();
+
+        const totalTeams = (boysTeams?.length || 0) + (girlsTeams?.length || 0);
+        const totalMatches = (boysMatches?.length || 0) + (girlsMatches?.length || 0);
+        const totalGoals = allPlayers.reduce((sum, p) => sum + (p.get('goals') || 0), 0);
+        const topScorer = allPlayers.sort((a, b) => (b.get('goals') || 0) - (a.get('goals') || 0))[0];
+
+        document.getElementById('summary-teams-count').textContent = totalTeams;
+        document.getElementById('summary-matches-count').textContent = totalMatches;
+        document.getElementById('summary-goals-count').textContent = totalGoals;
+        document.getElementById('summary-top-scorer').textContent = topScorer ? `${topScorer.get('name')} (${topScorer.get('goals') || 0})` : '—';
+      } catch (e) { console.error(e); }
+    }
+
+    function populateAdminNewsList(objs) {
+      const list = document.getElementById('admin-news-list'); if (!list) return;
+      if (!objs.length) { list.innerHTML = '<p class="text-muted">No news yet.</p>'; return; }
+      list.innerHTML = objs.map(o => `<button data-nid="${o.id}" class="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-slate-900/60 border border-slate-800 text-left hover:border-primary transition-colors"><span class="text-xs font-medium">${o.get('title') || 'News'}</span><span class="text-[11px] text-muted">${o.get('createdAt') ? new Date(o.get('createdAt')).toLocaleDateString() : ''}</span></button>`).join('');
+      list.querySelectorAll('[data-nid]').forEach(b => b.addEventListener('click', () => loadNewsIntoForm(b.dataset.nid)));
+    }
+    async function loadNewsIntoForm(id) {
+      try { const o = await new Parse.Query(News).get(id); document.getElementById('news-id').value = o.id; document.getElementById('news-title').value = o.get('title') || ''; document.getElementById('news-content').value = o.get('content') || ''; document.getElementById('news-delete-btn').classList.remove('hidden'); document.getElementById('news-form-message').textContent = 'Editing news.'; } catch (e) { console.error(e); }
+    }
+    function resetNewsForm() {
+      ['news-id', 'news-title', 'news-content'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; }); document.getElementById('news-delete-btn').classList.add('hidden'); document.getElementById('news-form-message').textContent = '';
+    }
+    async function saveNews(e) {
+      e.preventDefault(); const msg = document.getElementById('news-form-message'); msg.textContent = 'Saving…';
+      const id = document.getElementById('news-id').value; const title = document.getElementById('news-title').value.trim(); const content = document.getElementById('news-content').value.trim();
+      if (!title || !content) { msg.textContent = 'Title and content required.'; return; }
+      try { let o; if (id) { o = await new Parse.Query(News).get(id); } else { o = new News(); } o.set('title', title); o.set('content', content); await o.save(); msg.textContent = id ? 'Updated.' : 'Added.'; resetNewsForm(); await fetchNews(); const q = new Parse.Query(News); q.descending('createdAt'); q.limit(50); const rs = await q.find(); populateAdminNewsList(rs); } catch (e) { console.error(e); msg.textContent = 'Failed.'; }
+    }
+    async function deleteNews() {
+      const id = document.getElementById('news-id').value; const msg = document.getElementById('news-form-message');
+      if (!id) { msg.textContent = 'Select one first.'; return; } if (!confirm('Delete this news?')) return;
+      try { const o = await new Parse.Query(News).get(id); await o.destroy(); msg.textContent = 'Deleted.'; resetNewsForm(); await fetchNews(); const q = new Parse.Query(News); q.descending('createdAt'); q.limit(50); const rs = await q.find(); populateAdminNewsList(rs); } catch (e) { console.error(e); msg.textContent = 'Failed.'; }
     }
 
     async function fetchTeams() {
@@ -1730,10 +2007,35 @@
         q.limit(1000); const rs = await q.find();
         const byTeam = {};
         rs.forEach(p => { const tid = isGirls ? p.get('girlsTeamId') : p.get('team')?.id; if (!tid) return; if (!byTeam[tid]) byTeam[tid] = []; byTeam[tid].push({ id: p.id, name: p.get('name') || 'Unnamed', number: p.get('jerseyNumber'), position: p.get('position') || '', league: isGirls ? 'girls' : 'boys', transferValue: p.get('transferValue') ?? null }); });
-        teams.forEach(t => { const c = document.getElementById(`players-for-${prefix}-${t.id}`); if (!c) return; const pls = byTeam[t.id] || []; c.innerHTML = pls.length ? pls.map(p => `<div class="flex items-center justify-between"><span>${p.number ? '#' + p.number + ' ' : ''}${p.name}</span><span class="text-muted">${p.position}${p.transferValue != null ? ' · <span class="text-yellow-400">💵 ' + fmtMoney(p.transferValue) + '</span>' : ''}</span></div>`).join('') : '<span>No players listed yet.</span>'; });
+        teams.forEach(t => { const c = document.getElementById(`players-for-${prefix}-${t.id}`); if (!c) return; const pls = byTeam[t.id] || []; c.innerHTML = pls.length ? pls.map(p => `<button class="w-full text-left flex items-center justify-between hover:bg-slate-800 px-2 py-1 rounded transition-colors cursor-pointer" onclick="showPlayerProfile('${p.id}', '${p.league}')"><span>${p.number ? '#' + p.number + ' ' : ''}${p.name}</span><span class="text-muted text-[11px]">${p.position}${p.transferValue != null ? ' · <span class="text-yellow-400">💵 ' + fmtMoney(p.transferValue) + '</span>' : ''}</span></button>`).join('') : '<span>No players listed yet.</span>'; });
         if (!isGirls) { _allPlayers = _allPlayers.filter(p => p.league !== 'boys'); rs.forEach(p => { _allPlayers.push({ id: p.id, name: p.get('name') || 'Unnamed', number: p.get('jerseyNumber'), position: p.get('position') || '', teamId: p.get('team')?.id, teamName: teams.find(t => t.id === p.get('team')?.id)?.name || '', league: 'boys', transferValue: p.get('transferValue') ?? null }); }); }
         else { _allPlayers = _allPlayers.filter(p => p.league !== 'girls'); rs.forEach(p => { _allPlayers.push({ id: p.id, name: p.get('name') || 'Unnamed', number: p.get('jerseyNumber'), position: p.get('position') || '', teamId: p.get('girlsTeamId'), teamName: p.get('girlsTeamName') || teams.find(t => t.id === p.get('girlsTeamId'))?.name || '', league: 'girls', transferValue: p.get('transferValue') ?? null }); }); }
         renderAdminPlayersList();
+      } catch (e) { console.error(e); }
+    }
+
+    async function showPlayerProfile(playerId, league) {
+      try {
+        const p = await new Parse.Query(Player).get(playerId);
+        const modal = document.getElementById('player-profile-modal');
+        const teamQuery = league === 'girls' ? new Parse.Query(GirlsTeam).get(p.get('girlsTeamId')) : new Parse.Query(Team).get(p.get('team').id);
+        const team = await teamQuery;
+
+        document.getElementById('player-profile-number').textContent = p.get('jerseyNumber') ? '#' + p.get('jerseyNumber') : '—';
+        document.getElementById('player-profile-name').textContent = p.get('name') || 'Player';
+        document.getElementById('player-profile-team').textContent = team?.get('name') || 'Team';
+        document.getElementById('player-profile-position').textContent = p.get('position') || 'Position';
+        document.getElementById('player-profile-goals').textContent = p.get('goals') || 0;
+        document.getElementById('player-profile-assists').textContent = p.get('assists') || 0;
+        document.getElementById('player-profile-appearances').textContent = p.get('appearances') || 0;
+
+        const ach = await new Parse.Query(Achievement).where('playerName', 'equalTo', p.get('name')).find();
+        const girlsAch = await new Parse.Query(GirlsAchievement).where('playerName', 'equalTo', p.get('name')).find();
+        const allAch = [...ach, ...girlsAch].slice(0, 5);
+        document.getElementById('player-achievements-list').innerHTML = allAch.length ? allAch.map(a => `<div>★ ${a.get('title') || 'Achievement'}</div>`).join('') : '<div class="text-muted">No achievements yet.</div>';
+
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
       } catch (e) { console.error(e); }
     }
 
@@ -1763,12 +2065,44 @@
     async function deleteGirlsTeam() { const id = document.getElementById('girls-team-id').value, msg = document.getElementById('girls-team-form-message'); if (!id) { msg.textContent = 'Select a team first.'; return; } if (!confirm('Delete this girls team?')) return; try { const o = await new Parse.Query(GirlsTeam).get(id); await o.destroy(); msg.textContent = 'Deleted.'; resetGirlsTeamForm(); await fetchGirlsTeams(); } catch (e) { console.error(e); msg.textContent = 'Failed.'; } }
 
     async function fetchMatches() {
-      const list = document.getElementById('matches-list'), empty = document.getElementById('matches-empty'); list.innerHTML = ''; empty.classList.add('hidden');
-      try { const q = new Parse.Query(Match); q.include('homeTeam'); q.include('awayTeam'); q.descending('matchDate'); const rs = await q.find(); if (!rs.length) { empty.classList.remove('hidden'); return; } list.innerHTML = rs.map(o => matchCard(o, false)).join(''); list.querySelectorAll('[data-mid]').forEach(b => b.addEventListener('click', () => loadMatchIntoForm(b.dataset.mid))); } catch (e) { console.error(e); }
+      const upcomingList = document.getElementById('matches-upcoming-list'), upcomingEmpty = document.getElementById('matches-upcoming-empty');
+      const resultsList = document.getElementById('matches-results-list'), resultsEmpty = document.getElementById('matches-results-empty');
+      upcomingList.innerHTML = ''; resultsList.innerHTML = ''; upcomingEmpty.classList.add('hidden'); resultsEmpty.classList.add('hidden');
+      try {
+        const q = new Parse.Query(Match); q.include('homeTeam'); q.include('awayTeam'); q.descending('matchDate');
+        const rs = await q.find();
+        const upcoming = rs.filter(m => m.get('status') !== 'finished');
+        const results = rs.filter(m => m.get('status') === 'finished');
+
+        if (!upcoming.length) upcomingEmpty.classList.remove('hidden');
+        else upcomingList.innerHTML = upcoming.map(o => matchCard(o, false)).join('');
+
+        if (!results.length) resultsEmpty.classList.remove('hidden');
+        else resultsList.innerHTML = results.map(o => matchCard(o, false)).join('');
+
+        upcomingList.querySelectorAll('[data-mid]').forEach(b => b.addEventListener('click', () => loadMatchIntoForm(b.dataset.mid)));
+        resultsList.querySelectorAll('[data-mid]').forEach(b => b.addEventListener('click', () => loadMatchIntoForm(b.dataset.mid)));
+      } catch (e) { console.error(e); }
     }
     async function fetchGirlsMatches() {
-      const list = document.getElementById('girls-matches-list'), empty = document.getElementById('girls-matches-empty'); list.innerHTML = ''; empty.classList.add('hidden');
-      try { const q = new Parse.Query(GirlsMatch); q.include('homeTeam'); q.include('awayTeam'); q.descending('matchDate'); const rs = await q.find(); if (!rs.length) { empty.classList.remove('hidden'); return; } list.innerHTML = rs.map(o => matchCard(o, true)).join(''); list.querySelectorAll('[data-gmid]').forEach(b => b.addEventListener('click', () => loadGirlsMatchIntoForm(b.dataset.gmid))); } catch (e) { console.error(e); }
+      const upcomingList = document.getElementById('girls-matches-upcoming-list'), upcomingEmpty = document.getElementById('girls-matches-upcoming-empty');
+      const resultsList = document.getElementById('girls-matches-results-list'), resultsEmpty = document.getElementById('girls-matches-results-empty');
+      upcomingList.innerHTML = ''; resultsList.innerHTML = ''; upcomingEmpty.classList.add('hidden'); resultsEmpty.classList.add('hidden');
+      try {
+        const q = new Parse.Query(GirlsMatch); q.include('homeTeam'); q.include('awayTeam'); q.descending('matchDate');
+        const rs = await q.find();
+        const upcoming = rs.filter(m => m.get('status') !== 'finished');
+        const results = rs.filter(m => m.get('status') === 'finished');
+
+        if (!upcoming.length) upcomingEmpty.classList.remove('hidden');
+        else upcomingList.innerHTML = upcoming.map(o => matchCard(o, true)).join('');
+
+        if (!results.length) resultsEmpty.classList.remove('hidden');
+        else resultsList.innerHTML = results.map(o => matchCard(o, true)).join('');
+
+        upcomingList.querySelectorAll('[data-gmid]').forEach(b => b.addEventListener('click', () => loadGirlsMatchIntoForm(b.dataset.gmid)));
+        resultsList.querySelectorAll('[data-gmid]').forEach(b => b.addEventListener('click', () => loadGirlsMatchIntoForm(b.dataset.gmid)));
+      } catch (e) { console.error(e); }
     }
     function matchCard(o, isGirls) {
       const home = o.get('homeTeam'), away = o.get('awayTeam'); const hName = home?.get('name') || 'Home', aName = away?.get('name') || 'Away'; const hG = o.get('homeGoals'), aG = o.get('awayGoals'), status = o.get('status') || 'upcoming'; const date = o.get('matchDate') ? new Date(o.get('matchDate')).toLocaleDateString() : 'TBD';
@@ -2283,8 +2617,14 @@
       modal.addEventListener('click', e => { if (e.target === modal) modal.classList.add('hidden'); });
     }
 
+    function setupPlayerProfileModal() {
+      const modal = document.getElementById('player-profile-modal');
+      document.getElementById('close-player-modal').addEventListener('click', () => modal.classList.add('hidden'));
+      modal.addEventListener('click', e => { if (e.target === modal) modal.classList.add('hidden'); });
+    }
+
     function setupNav() {
-      const sectionIds = ['table', 'matches', 'players', 'achievements', 'transfers', 'captain'];
+      const sectionIds = ['table', 'matches', 'players', 'achievements', 'transfers', 'captain', 'news', 'stats'];
       const sections = {}, navBtns = {};
       sectionIds.forEach(k => {
         sections[k] = document.getElementById('section-' + k);
@@ -2303,7 +2643,7 @@
 
     function applyTheme(theme) {
       const html = document.documentElement, icon = document.getElementById('theme-toggle-icon'), label = document.getElementById('theme-toggle-label');
-      if (theme === 'light') { html.classList.remove('dark'); document.body.style.background = '#f1f5f9'; document.body.style.color = '#0f172a'; icon.textContent = '☀️'; label.textContent = 'Light'; }
+      if (theme === 'light') { html.classList.remove('dark'); document.body.style.background = '#f1f5f9'; document.body.style.color = '#0f172a'; icon.textContent = '◯'; label.textContent = 'Light'; }
       else { html.classList.add('dark'); document.body.style.background = ''; document.body.style.color = ''; icon.textContent = '🌙'; label.textContent = 'Dark'; }
     }
     function setupThemeToggle() {
@@ -2318,16 +2658,21 @@
       loadSiteConfig();
       fetchTeams(); fetchGirlsTeams();
       fetchMatches(); fetchGirlsMatches();
-      fetchAnnouncements();
+      fetchAnnouncements(); fetchNews();
       fetchAchievements(); fetchGirlsAchievements();
       fetchTransfers(); fetchGirlsTransfers();
+      fetchPlayerStats('boys'); fetchPlayerStats('girls');
+      updateLeagueSummaryCards();
 
-      setupLoginModal(); setupNav(); setupThemeToggle(); updateAuthUI();
+      setupLoginModal(); setupPlayerProfileModal(); setupNav(); setupThemeToggle(); updateAuthUI();
 
       document.getElementById('site-settings-form').addEventListener('submit', saveSiteSettings);
       document.getElementById('announcement-form').addEventListener('submit', saveAnnouncement);
       document.getElementById('announcement-reset-btn').addEventListener('click', resetAnnouncementForm);
       document.getElementById('announcement-delete-btn').addEventListener('click', deleteAnnouncement);
+      document.getElementById('news-form').addEventListener('submit', saveNews);
+      document.getElementById('news-reset-btn').addEventListener('click', resetNewsForm);
+      document.getElementById('news-delete-btn').addEventListener('click', deleteNews);
       document.getElementById('team-form').addEventListener('submit', saveTeam);
       document.getElementById('team-reset-btn').addEventListener('click', resetTeamForm);
       document.getElementById('team-delete-btn').addEventListener('click', deleteTeam);
