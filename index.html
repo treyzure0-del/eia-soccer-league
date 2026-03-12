@@ -77,7 +77,7 @@
 
     /* ── ICON NAV ── */
     .icon-nav-bar { background: #0f0f0f; border-top: 3px solid var(--orange); box-shadow: 0 -4px 30px rgba(0,0,0,.5); }
-    .icon-nav-inner { max-width: 1152px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); }
+    .icon-nav-inner { max-width: 1152px; margin: 0 auto; display: grid; grid-template-columns: repeat(6, 1fr); }
     .icon-card { position: relative; display: flex; flex-direction: column; align-items: center; padding: 22px 12px 18px; border-right: 1px solid #1e1e1e; background: transparent; cursor: pointer; transition: background .18s; border-top: none; border-bottom: none; border-left: none; color: inherit; text-align: center; }
     .icon-card:last-child { border-right: none; }
     .icon-card:hover, .icon-card.active { background: #1a1a1a; }
@@ -173,6 +173,12 @@
           <div class="icon-card-sub">Player movement</div>
           <div class="icon-card-details">Details</div>
         </button>
+        <button class="icon-card" id="nav-captain">
+          <div class="icon-card-icon">⚡</div>
+          <div class="icon-card-title">Captain Portal</div>
+          <div class="icon-card-sub">Team management</div>
+          <div class="icon-card-details">Details</div>
+        </button>
       </div>
     </div>
   </div>
@@ -201,7 +207,7 @@
                 <th class="px-3 py-3 text-left">Pos</th><th class="px-3 py-3 text-left">Team</th>
                 <th class="px-2 py-3 text-center">P</th><th class="px-2 py-3 text-center">W</th><th class="px-2 py-3 text-center">D</th><th class="px-2 py-3 text-center">L</th>
                 <th class="px-2 py-3 text-center">GF</th><th class="px-2 py-3 text-center">GA</th><th class="px-2 py-3 text-center">GD</th><th class="px-2 py-3 text-center">Pts</th>
-                <th class="px-3 py-3 text-center">Last 5</th>
+                <th class="px-3 py-3 text-center">Last 5</th><th class="px-3 py-3 text-center" title="Team Budget">💰 Budget</th>
               </tr></thead>
               <tbody id="league-table-body" class="divide-y divide-slate-800"></tbody>
             </table>
@@ -220,7 +226,7 @@
                 <th class="px-3 py-3 text-left">Pos</th><th class="px-3 py-3 text-left">Team</th>
                 <th class="px-2 py-3 text-center">P</th><th class="px-2 py-3 text-center">W</th><th class="px-2 py-3 text-center">D</th><th class="px-2 py-3 text-center">L</th>
                 <th class="px-2 py-3 text-center">GF</th><th class="px-2 py-3 text-center">GA</th><th class="px-2 py-3 text-center">GD</th><th class="px-2 py-3 text-center">Pts</th>
-                <th class="px-3 py-3 text-center">Last 5</th>
+                <th class="px-3 py-3 text-center">Last 5</th><th class="px-3 py-3 text-center" title="Team Budget">💰 Budget</th>
               </tr></thead>
               <tbody id="girls-league-table-body" class="divide-y divide-slate-800"></tbody>
             </table>
@@ -667,6 +673,126 @@
         </div>
       </div>
 
+      <!-- ADMIN: Budget Management -->
+      <div class="border border-slate-800 rounded-xl p-4 space-y-4" style="background:rgba(20,20,20,.8);border-left:3px solid #eab308;">
+        <div class="py-1"><span class="text-sm font-heading font-bold uppercase tracking-wide">💰 Team Budget Management</span></div>
+        <div class="space-y-3">
+          <div class="flex gap-2 flex-wrap">
+            <button class="tab-btn tab-btn-boys active text-xs" id="budget-tab-boys" onclick="switchBudgetTab('boys')">⚽ Boys</button>
+            <button class="tab-btn tab-btn-girls text-xs" id="budget-tab-girls" onclick="switchBudgetTab('girls')">🌸 Girls</button>
+          </div>
+          <div id="budget-boys-panel" class="space-y-3">
+            <p class="text-xs text-muted">Assign a budget to each boys team. Captains will see this in their portal.</p>
+            <div id="admin-budget-boys-list" class="space-y-2"></div>
+          </div>
+          <div id="budget-girls-panel" class="hidden space-y-3">
+            <p class="text-xs text-muted">Assign a budget to each girls team.</p>
+            <div id="admin-budget-girls-list" class="space-y-2"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN: Captain Code Management -->
+      <div class="border border-slate-800 rounded-xl p-4 space-y-3" style="background:rgba(20,20,20,.8);border-left:3px solid #a855f7;">
+        <div class="py-1"><span class="text-sm font-heading font-bold uppercase tracking-wide">🔑 Captain Codes</span></div>
+        <p class="text-xs text-muted">Each team's captain uses a unique code to log in to the Captain Portal. Set or update codes here.</p>
+        <div class="flex gap-2 flex-wrap">
+          <button class="tab-btn tab-btn-boys active text-xs" id="captcode-tab-boys" onclick="switchCaptCodeTab('boys')">⚽ Boys</button>
+          <button class="tab-btn tab-btn-girls text-xs" id="captcode-tab-girls" onclick="switchCaptCodeTab('girls')">🌸 Girls</button>
+        </div>
+        <div id="captcode-boys-panel" class="space-y-2">
+          <div id="admin-captcode-boys-list" class="space-y-2"></div>
+        </div>
+        <div id="captcode-girls-panel" class="hidden space-y-2">
+          <div id="admin-captcode-girls-list" class="space-y-2"></div>
+        </div>
+      </div>
+
+      <!-- ADMIN: Transfer Requests -->
+      <div class="border border-slate-800 rounded-xl p-4 space-y-3" style="background:rgba(20,20,20,.8);border-left:3px solid #22c55e;">
+        <div class="py-1"><span class="text-sm font-heading font-bold uppercase tracking-wide">📋 Transfer Requests</span></div>
+        <p class="text-xs text-muted">Review captain transfer requests. Approving will automatically deduct the fee from the buying team and add it to the selling team's budget, then record the official transfer.</p>
+        <div id="admin-transfer-requests-list" class="space-y-3"></div>
+        <div id="admin-transfer-requests-empty" class="hidden text-xs text-muted">No pending transfer requests.</div>
+      </div>
+
+    </section>
+
+    <!-- CAPTAIN PORTAL -->
+    <section id="section-captain" class="space-y-4 hidden">
+      <!-- Login -->
+      <div id="captain-login-panel" class="space-y-4">
+        <div>
+          <h2 class="text-xl md:text-2xl font-heading font-bold uppercase tracking-wide">⚡ Captain Portal</h2>
+          <p class="text-xs text-muted mt-1">Team captains log in here to manage transfers and view their team budget.</p>
+        </div>
+        <div class="border border-slate-800 rounded-xl p-5 max-w-sm" style="background:rgba(20,20,20,.9);border-top:3px solid var(--orange);">
+          <h3 class="text-base font-heading font-bold uppercase mb-3">Captain Login</h3>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs mb-1">Captain Code</label>
+              <input id="captain-code-input" type="password" placeholder="Enter your captain code" class="w-full rounded-lg bg-slate-950 border border-slate-700 text-sm px-3 py-2 focus:outline-none" />
+            </div>
+            <button onclick="captainLogin()" class="w-full rounded-full bg-primary px-4 py-2 text-sm font-medium hover:bg-primarySoft transition-colors">Enter Portal</button>
+            <p id="captain-login-msg" class="text-xs text-muted"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dashboard (shown after login) -->
+      <div id="captain-dashboard" class="hidden space-y-5">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h2 class="text-xl md:text-2xl font-heading font-bold uppercase tracking-wide">⚡ Captain Portal</h2>
+            <p id="captain-team-label" class="text-xs text-muted mt-1"></p>
+          </div>
+          <button onclick="captainLogout()" class="text-xs px-3 py-1.5 border border-slate-700 rounded text-muted hover:border-red-500 hover:text-red-400 transition-colors" style="font-family:'Oswald',sans-serif;letter-spacing:.06em;text-transform:uppercase;">Exit Portal</button>
+        </div>
+
+        <!-- Budget Card -->
+        <div class="border border-slate-700 rounded-xl p-5" style="background:rgba(20,20,20,.9);border-left:4px solid var(--orange);">
+          <div class="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <p class="text-xs text-muted uppercase tracking-wide font-heading">Team Budget</p>
+              <p id="captain-budget-display" class="text-3xl font-heading font-bold mt-1 text-win">$0</p>
+            </div>
+            <div class="text-4xl">💰</div>
+          </div>
+          <p class="text-[11px] text-muted mt-2">Win: +$5,000 &nbsp;|&nbsp; Loss: -$200 &nbsp;|&nbsp; Draw: no change</p>
+        </div>
+
+        <!-- Set Player Transfer Value -->
+        <div class="border border-slate-800 rounded-xl p-4 space-y-3" style="background:rgba(20,20,20,.8);">
+          <h3 class="text-sm font-heading font-bold uppercase tracking-wide">Set Player Transfer Values</h3>
+          <p class="text-xs text-muted">Set the asking price for each of your players to make them available for transfer.</p>
+          <div id="captain-players-list" class="space-y-2"></div>
+          <p id="captain-players-msg" class="text-xs text-muted"></p>
+        </div>
+
+        <!-- Request Transfer -->
+        <div class="border border-slate-800 rounded-xl p-4 space-y-3" style="background:rgba(20,20,20,.8);">
+          <h3 class="text-sm font-heading font-bold uppercase tracking-wide">Request Transfer of a Player</h3>
+          <p class="text-xs text-muted">Submit a transfer request to bring a player to your team. Admins will review and approve.</p>
+          <div class="space-y-2 text-xs">
+            <div><label class="block mb-1">Player Name</label><input id="tr-req-player" type="text" placeholder="Player's name" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5" /></div>
+            <div><label class="block mb-1">Currently at Team</label>
+              <select id="tr-req-from" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5">
+                <option value="">Select team...</option>
+              </select>
+            </div>
+            <div><label class="block mb-1">Transfer Fee Offered ($)</label><input id="tr-req-fee" type="number" min="0" placeholder="e.g. 5000" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5" /></div>
+            <div><label class="block mb-1">Note (optional)</label><input id="tr-req-note" type="text" placeholder="Any message to admins" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-2 py-1.5" /></div>
+            <button onclick="submitTransferRequest()" class="rounded-full bg-primary px-4 py-1.5 text-xs font-medium hover:bg-primarySoft transition-colors">Submit Request</button>
+            <p id="tr-req-msg" class="text-xs text-muted"></p>
+          </div>
+        </div>
+
+        <!-- My pending requests -->
+        <div class="border border-slate-800 rounded-xl p-4 space-y-3" style="background:rgba(20,20,20,.8);">
+          <h3 class="text-sm font-heading font-bold uppercase tracking-wide">My Transfer Requests</h3>
+          <div id="captain-requests-list" class="space-y-2 text-xs"></div>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -711,8 +837,11 @@
     const GirlsAchievement = Parse.Object.extend('GirlsAchievement');
     const Transfer    = Parse.Object.extend('Transfer');
     const GirlsTransfer = Parse.Object.extend('GirlsTransfer');
+    const TransferRequest = Parse.Object.extend('TransferRequest');
+    const CaptainSession  = Parse.Object.extend('CaptainSession');
 
     let _boysTeams = [], _girlsTeams = [], _allPlayers = [];
+    let _captainTeamId = null, _captainLeague = null, _captainToken = null;
 
     function parseLast5(str) {
       if (!str) return [];
@@ -887,10 +1016,11 @@
       const wins=o.get('wins')||0,draws=o.get('draws')||0,gf=o.get('goalsFor')||0,ga=o.get('goalsAgainst')||0;
       const pts=o.get('points'); const points=typeof pts==='number'?pts:wins*3+draws;
       const gd=o.get('goalDifference')!=null?o.get('goalDifference'):gf-ga;
-      return {id:o.id,name:o.get('name')||'Unknown',logoUrl:o.get('logoFile')?o.get('logoFile').url():'',played:o.get('played')||0,wins,draws,losses:o.get('losses')||0,gf,ga,gd,points,last5:o.get('last5')||[]};
+      return {id:o.id,name:o.get('name')||'Unknown',logoUrl:o.get('logoFile')?o.get('logoFile').url():'',played:o.get('played')||0,wins,draws,losses:o.get('losses')||0,gf,ga,gd,points,last5:o.get('last5')||[],budget:o.get('budget')??null,captainCode:o.get('captainCode')||''};
     }
     function sortTeams(a,b){if(b.points!==a.points)return b.points-a.points;if(b.gd!==a.gd)return b.gd-a.gd;return a.name.localeCompare(b.name);}
     function tableRow(t,i) {
+      const budgetDisplay = t.budget !== null ? `<span class="text-win font-semibold">$${t.budget.toLocaleString()}</span>` : '<span class="text-muted">—</span>';
       return `<tr class="hover:bg-slate-900/60 transition-colors">
         <td class="px-3 py-2 text-xs text-muted">${i+1}</td>
         <td class="px-3 py-2"><div class="flex items-center gap-2">${t.logoUrl?`<img src="${t.logoUrl}" class="w-7 h-7 rounded-full object-cover border border-slate-700"/>`:`<div class="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center text-[10px] text-muted">${t.name.charAt(0)}</div>`}<span class="text-sm font-medium">${t.name}</span></div></td>
@@ -899,27 +1029,32 @@
         <td class="px-2 py-2 text-center text-xs ${t.gd>=0?'text-win':'text-loss'}">${t.gd}</td>
         <td class="px-2 py-2 text-center text-xs font-semibold">${t.points}</td>
         <td class="px-3 py-2 text-center"><div class="inline-flex">${renderLast5(t.last5)}</div></td>
+        <td class="px-3 py-2 text-center text-xs">${budgetDisplay}</td>
       </tr>`;
     }
 
     function populateAdminTeamsList(teams) {
       const list=document.getElementById('admin-teams-list');if(!list)return;
       if(!teams.length){list.innerHTML='<p class="text-muted">No teams yet.</p>';return;}
-      list.innerHTML=teams.map(t=>`<button data-tid="${t.id}" class="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-slate-900/60 border border-slate-800 text-left hover:border-primary transition-colors"><span class="text-xs font-medium">${t.name}</span><span class="text-[11px] text-muted">${t.points} pts</span></button>`).join('');
+      list.innerHTML=teams.map(t=>`<button data-tid="${t.id}" class="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-slate-900/60 border border-slate-800 text-left hover:border-primary transition-colors"><span class="text-xs font-medium">${t.name}</span><span class="text-[11px] text-muted">${t.points} pts · ${fmtMoney(t.budget)}</span></button>`).join('');
       list.querySelectorAll('[data-tid]').forEach(b=>b.addEventListener('click',()=>loadTeamIntoForm(b.dataset.tid)));
+      renderAdminBudgetList(teams, false);
+      renderAdminCaptCodeList(teams, false);
     }
     function populateAdminGirlsTeamsList(teams) {
       const list=document.getElementById('admin-girls-teams-list');if(!list)return;
       if(!teams.length){list.innerHTML='<p class="text-muted">No girls teams yet.</p>';return;}
-      list.innerHTML=teams.map(t=>`<button data-gtid="${t.id}" class="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-slate-900/60 border border-slate-800 text-left hover:border-primary transition-colors"><span class="text-xs font-medium">${t.name}</span><span class="text-[11px] text-muted">${t.points} pts</span></button>`).join('');
+      list.innerHTML=teams.map(t=>`<button data-gtid="${t.id}" class="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-slate-900/60 border border-slate-800 text-left hover:border-primary transition-colors"><span class="text-xs font-medium">${t.name}</span><span class="text-[11px] text-muted">${t.points} pts · ${fmtMoney(t.budget)}</span></button>`).join('');
       list.querySelectorAll('[data-gtid]').forEach(b=>b.addEventListener('click',()=>loadGirlsTeamIntoForm(b.dataset.gtid)));
+      renderAdminBudgetList(teams, true);
+      renderAdminCaptCodeList(teams, true);
     }
     function populateTeamCards(teams, isGirls) {
       const containerId = isGirls ? 'girls-teams-players-list' : 'teams-players-list';
       const container = document.getElementById(containerId); if(!container)return;
       const cardClass = isGirls ? 'card-girls' : 'card-boys';
       if(!teams.length){container.innerHTML='';return;}
-      container.innerHTML=teams.map(t=>`<div class="border ${cardClass} rounded-xl p-3"><div class="flex items-center gap-2">${t.logoUrl?`<img src="${t.logoUrl}" class="w-7 h-7 rounded-full object-cover border border-slate-700"/>`:`<div class="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center text-[10px] text-muted">${t.name.charAt(0)}</div>`}<div><p class="text-xs font-semibold">${t.name}</p><p class="text-[11px] text-muted">${t.points} pts • GD ${t.gd}</p></div></div><div id="players-for-${isGirls?'g':'b'}-${t.id}" class="mt-2 space-y-1 text-[11px] text-muted">Loading…</div></div>`).join('');
+      container.innerHTML=teams.map(t=>`<div class="border ${cardClass} rounded-xl p-3"><div class="flex items-center gap-2">${t.logoUrl?`<img src="${t.logoUrl}" class="w-7 h-7 rounded-full object-cover border border-slate-700"/>`:`<div class="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center text-[10px] text-muted">${t.name.charAt(0)}</div>`}<div><p class="text-xs font-semibold">${t.name}</p><p class="text-[11px] text-muted">${t.points} pts • GD ${t.gd}${t.budget!==null?' • <span class="text-win font-semibold">💰 '+fmtMoney(t.budget)+'</span>':''}</p></div></div><div id="players-for-${isGirls?'g':'b'}-${t.id}" class="mt-2 space-y-1 text-[11px] text-muted">Loading…</div></div>`).join('');
     }
     function populatePlayerTeamOptions() {
       const leagueSel=document.getElementById('player-league'); const teamSel=document.getElementById('player-team');
@@ -949,10 +1084,10 @@
         else{const ptrs=teams.map(t=>{const obj=new Team();obj.id=t.id;return obj;});q.containedIn('team', ptrs);q.equalTo('league','boys');}
         q.limit(1000); const rs=await q.find();
         const byTeam={};
-        rs.forEach(p=>{const tid=isGirls?p.get('girlsTeamId'):p.get('team')?.id;if(!tid)return;if(!byTeam[tid])byTeam[tid]=[];byTeam[tid].push({id:p.id,name:p.get('name')||'Unnamed',number:p.get('jerseyNumber'),position:p.get('position')||'',league:isGirls?'girls':'boys'});});
-        teams.forEach(t=>{const c=document.getElementById(`players-for-${prefix}-${t.id}`);if(!c)return;const pls=byTeam[t.id]||[];c.innerHTML=pls.length?pls.map(p=>`<div class="flex items-center justify-between"><span>${p.number?'#'+p.number+' ':''}${p.name}</span><span>${p.position}</span></div>`).join(''):'<span>No players listed yet.</span>';});
-        if(!isGirls){_allPlayers=_allPlayers.filter(p=>p.league!=='boys');rs.forEach(p=>{_allPlayers.push({id:p.id,name:p.get('name')||'Unnamed',number:p.get('jerseyNumber'),position:p.get('position')||'',teamId:p.get('team')?.id,teamName:teams.find(t=>t.id===p.get('team')?.id)?.name||'',league:'boys'});});}
-        else{_allPlayers=_allPlayers.filter(p=>p.league!=='girls');rs.forEach(p=>{_allPlayers.push({id:p.id,name:p.get('name')||'Unnamed',number:p.get('jerseyNumber'),position:p.get('position')||'',teamId:p.get('girlsTeamId'),teamName:p.get('girlsTeamName')||teams.find(t=>t.id===p.get('girlsTeamId'))?.name||'',league:'girls'});});}
+        rs.forEach(p=>{const tid=isGirls?p.get('girlsTeamId'):p.get('team')?.id;if(!tid)return;if(!byTeam[tid])byTeam[tid]=[];byTeam[tid].push({id:p.id,name:p.get('name')||'Unnamed',number:p.get('jerseyNumber'),position:p.get('position')||'',league:isGirls?'girls':'boys',transferValue:p.get('transferValue')??null});});
+        teams.forEach(t=>{const c=document.getElementById(`players-for-${prefix}-${t.id}`);if(!c)return;const pls=byTeam[t.id]||[];c.innerHTML=pls.length?pls.map(p=>`<div class="flex items-center justify-between"><span>${p.number?'#'+p.number+' ':''}${p.name}</span><span class="text-muted">${p.position}${p.transferValue!=null?' · <span class="text-yellow-400">💵 '+fmtMoney(p.transferValue)+'</span>':''}</span></div>`).join(''):'<span>No players listed yet.</span>';});
+        if(!isGirls){_allPlayers=_allPlayers.filter(p=>p.league!=='boys');rs.forEach(p=>{_allPlayers.push({id:p.id,name:p.get('name')||'Unnamed',number:p.get('jerseyNumber'),position:p.get('position')||'',teamId:p.get('team')?.id,teamName:teams.find(t=>t.id===p.get('team')?.id)?.name||'',league:'boys',transferValue:p.get('transferValue')??null});});}
+        else{_allPlayers=_allPlayers.filter(p=>p.league!=='girls');rs.forEach(p=>{_allPlayers.push({id:p.id,name:p.get('name')||'Unnamed',number:p.get('jerseyNumber'),position:p.get('position')||'',teamId:p.get('girlsTeamId'),teamName:p.get('girlsTeamName')||teams.find(t=>t.id===p.get('girlsTeamId'))?.name||'',league:'girls',transferValue:p.get('transferValue')??null});});}
         renderAdminPlayersList();
       } catch(e){console.error(e);}
     }
@@ -998,11 +1133,35 @@
     }
     async function saveMatch(e) {
       e.preventDefault(); const msg=document.getElementById('match-form-message');msg.textContent='Saving…'; const id=document.getElementById('match-id').value; const hId=document.getElementById('match-home').value,aId=document.getElementById('match-away').value; if(!hId||!aId||hId===aId){msg.textContent='Choose two different teams.';return;}
-      try { let o;if(id){o=await new Parse.Query(Match).get(id);}else o=new Match(); const h=new Team();h.id=hId;const a=new Team();a.id=aId; o.set('homeTeam',h);o.set('awayTeam',a);o.set('homeGoals',+document.getElementById('match-home-goals').value||0);o.set('awayGoals',+document.getElementById('match-away-goals').value||0);o.set('status',document.getElementById('match-status').value); const d=document.getElementById('match-date').value;if(d)o.set('matchDate',new Date(d)); await o.save();msg.textContent='Saved.';resetMatchForm();await fetchMatches(); } catch(e){console.error(e);msg.textContent='Failed.';}
+      try {
+        let o; let prevStatus = '';
+        if(id){o=await new Parse.Query(Match).get(id); prevStatus=o.get('status')||'';}else o=new Match();
+        const h=new Team();h.id=hId;const a=new Team();a.id=aId;
+        const newStatus=document.getElementById('match-status').value;
+        const hGoals=+document.getElementById('match-home-goals').value||0;
+        const aGoals=+document.getElementById('match-away-goals').value||0;
+        o.set('homeTeam',h);o.set('awayTeam',a);o.set('homeGoals',hGoals);o.set('awayGoals',aGoals);o.set('status',newStatus);
+        const d=document.getElementById('match-date').value;if(d)o.set('matchDate',new Date(d));
+        await o.save();
+        await applyMatchBudget(hId,aId,hGoals,aGoals,newStatus,'boys',prevStatus);
+        msg.textContent='Saved.';resetMatchForm();await fetchMatches();await fetchTeams();
+      } catch(e){console.error(e);msg.textContent='Failed.';}
     }
     async function saveGirlsMatch(e) {
       e.preventDefault(); const msg=document.getElementById('girls-match-form-message');msg.textContent='Saving…'; const id=document.getElementById('girls-match-id').value; const hId=document.getElementById('girls-match-home').value,aId=document.getElementById('girls-match-away').value; if(!hId||!aId||hId===aId){msg.textContent='Choose two different teams.';return;}
-      try { let o;if(id){o=await new Parse.Query(GirlsMatch).get(id);}else o=new GirlsMatch(); const h=new GirlsTeam();h.id=hId;const a=new GirlsTeam();a.id=aId; o.set('homeTeam',h);o.set('awayTeam',a);o.set('homeGoals',+document.getElementById('girls-match-home-goals').value||0);o.set('awayGoals',+document.getElementById('girls-match-away-goals').value||0);o.set('status',document.getElementById('girls-match-status').value); const d=document.getElementById('girls-match-date').value;if(d)o.set('matchDate',new Date(d)); await o.save();msg.textContent='Saved.';resetGirlsMatchForm();await fetchGirlsMatches(); } catch(e){console.error(e);msg.textContent='Failed.';}
+      try {
+        let o; let prevStatus = '';
+        if(id){o=await new Parse.Query(GirlsMatch).get(id); prevStatus=o.get('status')||'';}else o=new GirlsMatch();
+        const h=new GirlsTeam();h.id=hId;const a=new GirlsTeam();a.id=aId;
+        const newStatus=document.getElementById('girls-match-status').value;
+        const hGoals=+document.getElementById('girls-match-home-goals').value||0;
+        const aGoals=+document.getElementById('girls-match-away-goals').value||0;
+        o.set('homeTeam',h);o.set('awayTeam',a);o.set('homeGoals',hGoals);o.set('awayGoals',aGoals);o.set('status',newStatus);
+        const d=document.getElementById('girls-match-date').value;if(d)o.set('matchDate',new Date(d));
+        await o.save();
+        await applyMatchBudget(hId,aId,hGoals,aGoals,newStatus,'girls',prevStatus);
+        msg.textContent='Saved.';resetGirlsMatchForm();await fetchGirlsMatches();await fetchGirlsTeams();
+      } catch(e){console.error(e);msg.textContent='Failed.';}
     }
     async function loadMatchIntoForm(id) { try { const o=await new Parse.Query(Match).get(id); document.getElementById('match-id').value=o.id; document.getElementById('match-home').value=o.get('homeTeam')?.id||''; document.getElementById('match-away').value=o.get('awayTeam')?.id||''; document.getElementById('match-home-goals').value=o.get('homeGoals')??0; document.getElementById('match-away-goals').value=o.get('awayGoals')??0; const d=o.get('matchDate');document.getElementById('match-date').value=d?new Date(d).toISOString().slice(0,10):''; document.getElementById('match-status').value=o.get('status')||'upcoming'; document.getElementById('match-delete-btn').classList.remove('hidden'); document.getElementById('match-form-message').textContent='Editing match.'; document.getElementById('match-form').scrollIntoView({behavior:'smooth'}); } catch(e){console.error(e);} }
     async function loadGirlsMatchIntoForm(id) { try { const o=await new Parse.Query(GirlsMatch).get(id); document.getElementById('girls-match-id').value=o.id; document.getElementById('girls-match-home').value=o.get('homeTeam')?.id||''; document.getElementById('girls-match-away').value=o.get('awayTeam')?.id||''; document.getElementById('girls-match-home-goals').value=o.get('homeGoals')??0; document.getElementById('girls-match-away-goals').value=o.get('awayGoals')??0; const d=o.get('matchDate');document.getElementById('girls-match-date').value=d?new Date(d).toISOString().slice(0,10):''; document.getElementById('girls-match-status').value=o.get('status')||'upcoming'; document.getElementById('girls-match-delete-btn').classList.remove('hidden'); document.getElementById('girls-match-form-message').textContent='Editing match.'; document.getElementById('girls-match-form').scrollIntoView({behavior:'smooth'}); } catch(e){console.error(e);} }
@@ -1108,15 +1267,367 @@
       try{const o=await new Parse.Query(ParseClass).get(id);await o.destroy();msg.textContent='Deleted.'; if(isGirls){resetGirlsTransferForm();await fetchGirlsTransfers();}else{resetTransferForm();await fetchTransfers();}}catch(e){console.error(e);msg.textContent='Failed.';}
     }
 
+    // ─────── BUDGET / CAPTAIN SYSTEM ───────
+
+    function fmtMoney(n) { return n != null ? '$'+Number(n).toLocaleString() : '—'; }
+
+    function switchBudgetTab(league) {
+      document.getElementById('budget-boys-panel').classList.toggle('hidden', league!=='boys');
+      document.getElementById('budget-girls-panel').classList.toggle('hidden', league!=='girls');
+      document.getElementById('budget-tab-boys').classList.toggle('active', league==='boys');
+      document.getElementById('budget-tab-girls').classList.toggle('active', league==='girls');
+    }
+    function switchCaptCodeTab(league) {
+      document.getElementById('captcode-boys-panel').classList.toggle('hidden', league!=='boys');
+      document.getElementById('captcode-girls-panel').classList.toggle('hidden', league!=='girls');
+      document.getElementById('captcode-tab-boys').classList.toggle('active', league==='boys');
+      document.getElementById('captcode-tab-girls').classList.toggle('active', league==='girls');
+    }
+
+    function renderAdminBudgetList(teams, isGirls) {
+      const id = isGirls ? 'admin-budget-girls-list' : 'admin-budget-boys-list';
+      const el = document.getElementById(id); if(!el) return;
+      if(!teams.length){el.innerHTML='<p class="text-muted text-xs">No teams yet.</p>';return;}
+      el.innerHTML = teams.map(t=>`
+        <div class="flex items-center gap-2 flex-wrap border border-slate-800 rounded-lg px-3 py-2" style="background:#111">
+          <span class="text-xs font-medium flex-1">${t.name}</span>
+          <span class="text-xs text-muted">Current: <b class="text-win">${fmtMoney(t.budget)}</b></span>
+          <input id="budget-inp-${t.id}" type="number" min="0" value="${t.budget??''}" placeholder="Amount" class="w-28 rounded bg-slate-900 border border-slate-700 px-2 py-1 text-xs" />
+          <button onclick="saveBudget('${t.id}','${isGirls?'girls':'boys'}')" class="rounded-full bg-primary px-3 py-1 text-xs font-medium hover:bg-primarySoft transition-colors">Save</button>
+          <span id="budget-msg-${t.id}" class="text-[11px] text-muted"></span>
+        </div>`).join('');
+    }
+
+    async function saveBudget(teamId, league) {
+      const inp = document.getElementById('budget-inp-'+teamId);
+      const msg = document.getElementById('budget-msg-'+teamId);
+      const val = parseFloat(inp.value);
+      if(isNaN(val)||val<0){msg.textContent='Invalid amount';return;}
+      msg.textContent='Saving…';
+      try {
+        const ParseClass = league==='girls' ? GirlsTeam : Team;
+        const obj = await new Parse.Query(ParseClass).get(teamId);
+        obj.set('budget', val); await obj.save();
+        msg.textContent='✓ Saved';
+        if(league==='girls') await fetchGirlsTeams(); else await fetchTeams();
+      } catch(e){console.error(e);msg.textContent='Failed';}
+    }
+
+    function renderAdminCaptCodeList(teams, isGirls) {
+      const id = isGirls ? 'admin-captcode-girls-list' : 'admin-captcode-boys-list';
+      const el = document.getElementById(id); if(!el) return;
+      if(!teams.length){el.innerHTML='<p class="text-muted text-xs">No teams yet.</p>';return;}
+      el.innerHTML = teams.map(t=>`
+        <div class="flex items-center gap-2 flex-wrap border border-slate-800 rounded-lg px-3 py-2" style="background:#111">
+          <span class="text-xs font-medium flex-1">${t.name}</span>
+          <input id="captcode-inp-${t.id}" type="text" value="${t.captainCode||''}" placeholder="Set captain code" class="w-36 rounded bg-slate-900 border border-slate-700 px-2 py-1 text-xs font-mono" />
+          <button onclick="saveCaptainCode('${t.id}','${isGirls?'girls':'boys'}')" class="rounded-full bg-primary px-3 py-1 text-xs font-medium hover:bg-primarySoft transition-colors">Save</button>
+          <span id="captcode-msg-${t.id}" class="text-[11px] text-muted"></span>
+        </div>`).join('');
+    }
+
+    async function saveCaptainCode(teamId, league) {
+      const inp = document.getElementById('captcode-inp-'+teamId);
+      const msg = document.getElementById('captcode-msg-'+teamId);
+      const code = inp.value.trim();
+      if(!code){msg.textContent='Enter a code';return;}
+      msg.textContent='Saving…';
+      try {
+        const ParseClass = league==='girls' ? GirlsTeam : Team;
+        const obj = await new Parse.Query(ParseClass).get(teamId);
+        obj.set('captainCode', code); await obj.save();
+        msg.textContent='✓ Saved';
+        if(league==='girls') await fetchGirlsTeams(); else await fetchTeams();
+      } catch(e){console.error(e);msg.textContent='Failed';}
+    }
+
+    // ─── Transfer Request admin panel ───
+    async function fetchAdminTransferRequests() {
+      const list = document.getElementById('admin-transfer-requests-list');
+      const empty = document.getElementById('admin-transfer-requests-empty');
+      if(!list) return;
+      list.innerHTML = '<p class="text-xs text-muted">Loading…</p>';
+      try {
+        const q = new Parse.Query(TransferRequest);
+        q.descending('createdAt'); q.limit(50);
+        const rs = await q.find();
+        if(!rs.length){list.innerHTML='';empty.classList.remove('hidden');return;}
+        empty.classList.add('hidden');
+        list.innerHTML = rs.map(r => {
+          const status = r.get('status')||'pending';
+          const statusColor = status==='approved'?'text-win':status==='rejected'?'text-loss':'text-draw';
+          const isPending = status==='pending';
+          return `<div class="border border-slate-800 rounded-xl px-4 py-3 space-y-2" style="background:#111">
+            <div class="flex items-start justify-between gap-2 flex-wrap">
+              <div>
+                <p class="text-xs font-semibold">🔄 ${r.get('playerName')||'Unknown'}</p>
+                <p class="text-[11px] text-muted">${r.get('fromTeamName')||'—'} → ${r.get('toTeamName')||'—'} &nbsp;|&nbsp; Fee: <b class="text-win">${fmtMoney(r.get('fee'))}</b></p>
+                ${r.get('note')?`<p class="text-[11px] text-gray-400 italic">"${r.get('note')}"</p>`:''}
+              </div>
+              <span class="text-[11px] font-bold uppercase ${statusColor}">${status}</span>
+            </div>
+            ${isPending?`<div class="flex gap-2 flex-wrap">
+              <button onclick="approveTransferRequest('${r.id}')" class="rounded-full bg-win/20 border border-win text-win px-3 py-1 text-xs hover:bg-win/30 transition-colors">✓ Approve & Execute</button>
+              <button onclick="rejectTransferRequest('${r.id}')" class="rounded-full bg-loss/20 border border-red-500 text-red-400 px-3 py-1 text-xs hover:bg-loss/30 transition-colors">✕ Reject</button>
+            </div>`:''}
+            <p id="treq-msg-${r.id}" class="text-[11px] text-muted"></p>
+          </div>`;
+        }).join('');
+      } catch(e){console.error(e);list.innerHTML='<p class="text-xs text-loss">Failed to load requests.</p>';}
+    }
+
+    async function approveTransferRequest(reqId) {
+      const msg = document.getElementById('treq-msg-'+reqId);
+      if(!confirm('Approve this transfer? Budget will be automatically adjusted.')) return;
+      msg.textContent = 'Processing…';
+      try {
+        const req = await new Parse.Query(TransferRequest).get(reqId);
+        if(req.get('status') !== 'pending'){msg.textContent='Already processed.';return;}
+        const fee = req.get('fee')||0;
+        const fromTeamId = req.get('fromTeamId');
+        const toTeamId = req.get('toTeamId');
+        const league = req.get('league');
+        const ParseClass = league==='girls' ? GirlsTeam : Team;
+        const TransferClass = league==='girls' ? GirlsTransfer : Transfer;
+
+        // Deduct fee from buying team, add to selling team
+        if(toTeamId && fee > 0) {
+          const buyingTeam = await new Parse.Query(ParseClass).get(toTeamId);
+          const curBudget = buyingTeam.get('budget')||0;
+          if(curBudget < fee){msg.textContent='Buying team has insufficient budget!';return;}
+          buyingTeam.set('budget', curBudget - fee);
+          await buyingTeam.save();
+        }
+        if(fromTeamId && fee > 0) {
+          const sellingTeam = await new Parse.Query(ParseClass).get(fromTeamId);
+          const curBudget = sellingTeam.get('budget')||0;
+          sellingTeam.set('budget', curBudget + fee);
+          await sellingTeam.save();
+        }
+
+        // Record official transfer
+        const tr = new TransferClass();
+        tr.set('playerName', req.get('playerName'));
+        tr.set('fromTeam', req.get('fromTeamName'));
+        tr.set('toTeam', req.get('toTeamName'));
+        tr.set('note', `Fee: ${fmtMoney(fee)} — Approved via Captain Portal`);
+        tr.set('transferDate', new Date());
+        await tr.save();
+
+        // Update player team if playerObjectId is set
+        const playerObjId = req.get('playerObjectId');
+        if(playerObjId && toTeamId) {
+          try {
+            const player = await new Parse.Query(Player).get(playerObjId);
+            if(league==='girls'){player.set('girlsTeamId', toTeamId);player.set('girlsTeamName', req.get('toTeamName')||'');}
+            else{const t=new Team();t.id=toTeamId;player.set('team',t);}
+            await player.save();
+          } catch(pe){console.warn('Could not update player team:',pe);}
+        }
+
+        req.set('status','approved'); await req.save();
+        msg.textContent='✓ Approved & executed!';
+        await fetchAdminTransferRequests();
+        if(league==='girls'){await fetchGirlsTeams();await fetchGirlsTransfers();}
+        else{await fetchTeams();await fetchTransfers();}
+      } catch(e){console.error(e);msg.textContent='Error: '+e.message;}
+    }
+
+    async function rejectTransferRequest(reqId) {
+      const msg = document.getElementById('treq-msg-'+reqId);
+      if(!confirm('Reject this transfer request?')) return;
+      msg.textContent = 'Rejecting…';
+      try {
+        const req = await new Parse.Query(TransferRequest).get(reqId);
+        req.set('status','rejected'); await req.save();
+        msg.textContent='Rejected.';
+        await fetchAdminTransferRequests();
+      } catch(e){console.error(e);msg.textContent='Failed';}
+    }
+
+    // ─── Match result → budget auto-update ───
+    // Hook into saveMatch / saveGirlsMatch: after saving a "finished" match, auto-apply budget changes
+    async function applyMatchBudget(homeId, awayId, homeGoals, awayGoals, status, league, prevStatus) {
+      if(status !== 'finished' || prevStatus === 'finished') return; // only apply once when first set to finished
+      const ParseClass = league==='girls' ? GirlsTeam : Team;
+      try {
+        const homeTeam = await new Parse.Query(ParseClass).get(homeId);
+        const awayTeam = await new Parse.Query(ParseClass).get(awayId);
+        const homeBudget = homeTeam.get('budget') ?? null;
+        const awayBudget = awayTeam.get('budget') ?? null;
+        if(homeBudget === null && awayBudget === null) return; // no budgets set, skip
+        if(homeGoals > awayGoals) {
+          // Home wins
+          if(homeBudget !== null) homeTeam.set('budget', Math.max(0, homeBudget + 5000));
+          if(awayBudget !== null) awayTeam.set('budget', Math.max(0, awayBudget - 200));
+        } else if(awayGoals > homeGoals) {
+          // Away wins
+          if(awayBudget !== null) awayTeam.set('budget', Math.max(0, awayBudget + 5000));
+          if(homeBudget !== null) homeTeam.set('budget', Math.max(0, homeBudget - 200));
+        }
+        // Draw: no change
+        if(homeBudget !== null) await homeTeam.save();
+        if(awayBudget !== null) await awayTeam.save();
+      } catch(e){console.warn('Budget update after match failed:',e);}
+    }
+
+    // ─── Captain Portal ───
+    async function captainLogin() {
+      const code = document.getElementById('captain-code-input').value.trim();
+      const msg = document.getElementById('captain-login-msg');
+      if(!code){msg.textContent='Enter your captain code.';return;}
+      msg.textContent='Verifying…';
+      try {
+        // Search boys teams
+        let found = null, league = null;
+        const bq = new Parse.Query(Team); bq.equalTo('captainCode', code); bq.limit(1);
+        const bResult = await bq.find();
+        if(bResult.length){found = bResult[0]; league = 'boys';}
+        if(!found){
+          const gq = new Parse.Query(GirlsTeam); gq.equalTo('captainCode', code); gq.limit(1);
+          const gResult = await gq.find();
+          if(gResult.length){found = gResult[0]; league = 'girls';}
+        }
+        if(!found){msg.textContent='Invalid code. Please check with your admin.';return;}
+        _captainTeamId = found.id;
+        _captainLeague = league;
+        _captainToken = code;
+        msg.textContent='';
+        document.getElementById('captain-login-panel').classList.add('hidden');
+        document.getElementById('captain-dashboard').classList.remove('hidden');
+        await loadCaptainDashboard(found, league);
+      } catch(e){console.error(e);msg.textContent='Login failed. Try again.';}
+    }
+
+    async function loadCaptainDashboard(teamObj, league) {
+      const teamName = teamObj.get('name');
+      const budget = teamObj.get('budget') ?? null;
+      document.getElementById('captain-team-label').textContent = `${teamName} · ${league==='girls'?'Girls':'Boys'} League`;
+      document.getElementById('captain-budget-display').textContent = budget !== null ? fmtMoney(budget) : 'Not Assigned';
+
+      // Populate "from team" dropdown with other teams
+      const allTeams = league==='girls' ? _girlsTeams : _boysTeams;
+      const fromSel = document.getElementById('tr-req-from');
+      fromSel.innerHTML = '<option value="">Select team...</option>' + allTeams.filter(t=>t.id!==_captainTeamId).map(t=>`<option value="${t.id}" data-name="${t.name}">${t.name}</option>`).join('');
+
+      // Load players for this team with value inputs
+      await loadCaptainPlayers(league, _captainTeamId, teamName);
+
+      // Load transfer requests for this team
+      await loadCaptainRequests();
+    }
+
+    async function loadCaptainPlayers(league, teamId, teamName) {
+      const list = document.getElementById('captain-players-list');
+      const msg = document.getElementById('captain-players-msg');
+      list.innerHTML = '<p class="text-xs text-muted">Loading players…</p>';
+      try {
+        const q = new Parse.Query(Player);
+        if(league==='girls') q.equalTo('girlsTeamId', teamId);
+        else { const t=new Team();t.id=teamId; q.equalTo('team',t); q.equalTo('league','boys'); }
+        q.limit(200); const rs = await q.find();
+        if(!rs.length){list.innerHTML='<p class="text-xs text-muted">No players found for your team.</p>';return;}
+        list.innerHTML = rs.map(p=>{
+          const val = p.get('transferValue') ?? '';
+          return `<div class="flex items-center gap-2 flex-wrap border border-slate-800 rounded-lg px-3 py-2 text-xs" style="background:#111">
+            <span class="flex-1 font-medium">${p.get('jerseyNumber')?'#'+p.get('jerseyNumber')+' ':''}${p.get('name')||'Unknown'} <span class="text-muted">${p.get('position')||''}</span></span>
+            <input id="pval-${p.id}" type="number" min="0" value="${val}" placeholder="Transfer value $" class="w-32 rounded bg-slate-900 border border-slate-700 px-2 py-1 text-xs" />
+            <button onclick="savePlayerValue('${p.id}')" class="rounded-full bg-primary px-3 py-1 text-xs hover:bg-primarySoft transition-colors">Set</button>
+            <span id="pval-msg-${p.id}" class="text-[11px] text-muted"></span>
+          </div>`;
+        }).join('');
+      } catch(e){console.error(e);list.innerHTML='<p class="text-xs text-loss">Failed to load players.</p>';}
+    }
+
+    async function savePlayerValue(playerId) {
+      const inp = document.getElementById('pval-'+playerId);
+      const msg = document.getElementById('pval-msg-'+playerId);
+      const val = parseFloat(inp.value);
+      if(isNaN(val)||val<0){msg.textContent='Invalid';return;}
+      msg.textContent='Saving…';
+      try {
+        const p = await new Parse.Query(Player).get(playerId);
+        p.set('transferValue', val); await p.save();
+        msg.textContent='✓ Set';
+      } catch(e){console.error(e);msg.textContent='Failed';}
+    }
+
+    async function submitTransferRequest() {
+      const playerName = document.getElementById('tr-req-player').value.trim();
+      const fromSel = document.getElementById('tr-req-from');
+      const fromTeamId = fromSel.value;
+      const fromTeamName = fromSel.options[fromSel.selectedIndex]?.dataset?.name || fromSel.options[fromSel.selectedIndex]?.text || '';
+      const fee = parseFloat(document.getElementById('tr-req-fee').value)||0;
+      const note = document.getElementById('tr-req-note').value.trim();
+      const msg = document.getElementById('tr-req-msg');
+      if(!playerName||!fromTeamId){msg.textContent='Player name and source team are required.';return;}
+      msg.textContent='Submitting…';
+      try {
+        const allTeams = _captainLeague==='girls' ? _girlsTeams : _boysTeams;
+        const myTeam = allTeams.find(t=>t.id===_captainTeamId);
+        const myBudget = myTeam?.budget ?? null;
+        if(myBudget !== null && fee > myBudget){msg.textContent=`Insufficient budget. Your balance: ${fmtMoney(myBudget)}`;return;}
+        const req = new TransferRequest();
+        req.set('playerName', playerName);
+        req.set('fromTeamId', fromTeamId);
+        req.set('fromTeamName', fromTeamName);
+        req.set('toTeamId', _captainTeamId);
+        req.set('toTeamName', myTeam?.name||'');
+        req.set('fee', fee);
+        req.set('note', note);
+        req.set('league', _captainLeague);
+        req.set('status', 'pending');
+        await req.save();
+        msg.textContent='✓ Request submitted! Awaiting admin approval.';
+        document.getElementById('tr-req-player').value='';
+        document.getElementById('tr-req-fee').value='';
+        document.getElementById('tr-req-note').value='';
+        document.getElementById('tr-req-from').value='';
+        await loadCaptainRequests();
+      } catch(e){console.error(e);msg.textContent='Failed: '+e.message;}
+    }
+
+    async function loadCaptainRequests() {
+      const list = document.getElementById('captain-requests-list'); if(!list) return;
+      list.innerHTML = '<p class="text-xs text-muted">Loading…</p>';
+      try {
+        const q = new Parse.Query(TransferRequest);
+        q.equalTo('toTeamId', _captainTeamId);
+        q.descending('createdAt'); q.limit(20);
+        const rs = await q.find();
+        if(!rs.length){list.innerHTML='<p class="text-xs text-muted">No transfer requests yet.</p>';return;}
+        list.innerHTML = rs.map(r=>{
+          const status = r.get('status')||'pending';
+          const statusColor = status==='approved'?'text-win':status==='rejected'?'text-loss':'text-draw';
+          return `<div class="border border-slate-800 rounded-lg px-3 py-2 text-xs" style="background:#111">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-medium">🔄 ${r.get('playerName')} from ${r.get('fromTeamName')} — Fee: ${fmtMoney(r.get('fee'))}</span>
+              <span class="font-bold uppercase text-[11px] ${statusColor}">${status}</span>
+            </div>
+            ${r.get('note')?`<p class="text-muted italic mt-0.5">"${r.get('note')}"</p>`:''}
+          </div>`;
+        }).join('');
+      } catch(e){console.error(e);list.innerHTML='<p class="text-xs text-loss">Failed.</p>';}
+    }
+
+    function captainLogout() {
+      _captainTeamId = null; _captainLeague = null; _captainToken = null;
+      document.getElementById('captain-login-panel').classList.remove('hidden');
+      document.getElementById('captain-dashboard').classList.add('hidden');
+      document.getElementById('captain-code-input').value='';
+      document.getElementById('captain-login-msg').textContent='';
+    }
+
     function updateAuthUI() {
       const user=Parse.User.current();
       document.getElementById('admin-panel').classList.toggle('hidden',!user);
       document.getElementById('admin-login-btn').classList.toggle('hidden',!!user);
       document.getElementById('logout-btn').classList.toggle('hidden',!user);
+      if(user) fetchAdminTransferRequests();
     }
     async function handleLogin(e) {
       e.preventDefault(); const msg=document.getElementById('login-message');msg.textContent='Logging in…';
-      try { await Parse.User.logIn(document.getElementById('login-username').value.trim(),document.getElementById('login-password').value); msg.textContent='Logged in.'; document.getElementById('admin-login-modal').classList.add('hidden'); updateAuthUI(); } catch(e){console.error(e);msg.textContent='Invalid credentials.';}
+      try { await Parse.User.logIn(document.getElementById('login-username').value.trim(),document.getElementById('login-password').value); msg.textContent='Logged in.'; document.getElementById('admin-login-modal').classList.add('hidden'); updateAuthUI(); await fetchAdminTransferRequests(); } catch(e){console.error(e);msg.textContent='Invalid credentials.';}
     }
     async function handleLogout() { try{await Parse.User.logOut();}catch(e){console.error(e);}finally{updateAuthUI();} }
     function setupLoginModal() {
@@ -1127,7 +1638,7 @@
     }
 
     function setupNav() {
-      const sectionIds=['table','matches','players','achievements','transfers'];
+      const sectionIds=['table','matches','players','achievements','transfers','captain'];
       const sections={}, navBtns={};
       sectionIds.forEach(k=>{
         sections[k]=document.getElementById('section-'+k);
