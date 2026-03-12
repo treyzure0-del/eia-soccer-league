@@ -48,6 +48,11 @@
       --girls: #ec4899;
       --girls-bg: rgba(236, 72, 153, .08);
       --girls-border: rgba(236, 72, 153, .35);
+      --overlay-opacity: 0.6;
+    }
+
+    .light {
+      --overlay-opacity: 0.2;
     }
 
     *,
@@ -431,7 +436,7 @@
   <div id="bg-media-container" class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
     <img id="bg-image" src="" alt="League background" class="hidden w-full h-full object-cover" />
     <video id="bg-video" class="hidden w-full h-full object-cover" autoplay muted loop playsinline></video>
-    <div id="bg-overlay" class="absolute inset-0 bg-black/60"></div>
+    <div id="bg-overlay" class="absolute inset-0" style="background-color:rgba(0,0,0,var(--overlay-opacity))"></div>
   </div>
 
   <div class="nav-stripe"></div>
@@ -1762,9 +1767,13 @@
 
     function applyBackgroundFromConfig(config) {
       const type = config?.get('bgMediaType') || 'none', file = config?.get('bgMediaFile');
-      const img = document.getElementById('bg-image'), vid = document.getElementById('bg-video');
+      const img = document.getElementById('bg-image'), vid = document.getElementById('bg-video'), overlay = document.getElementById('bg-overlay');
       img.classList.add('hidden'); vid.classList.add('hidden'); img.src = ''; vid.src = '';
-      if (!file || type === 'none') return;
+      if (!file || type === 'none') {
+        if (overlay) overlay.style.display = 'none';
+        return;
+      }
+      if (overlay) overlay.style.display = 'block';
       const url = file.url();
       if (type === 'image') { img.src = url; img.classList.remove('hidden'); }
       else if (type === 'video') { vid.src = url; vid.classList.remove('hidden'); }
@@ -2643,8 +2652,29 @@
 
     function applyTheme(theme) {
       const html = document.documentElement, icon = document.getElementById('theme-toggle-icon'), label = document.getElementById('theme-toggle-label');
-      if (theme === 'light') { html.classList.remove('dark'); document.body.style.background = '#f1f5f9'; document.body.style.color = '#0f172a'; icon.textContent = '◯'; label.textContent = 'Light'; }
-      else { html.classList.add('dark'); document.body.style.background = ''; document.body.style.color = ''; icon.textContent = '🌙'; label.textContent = 'Dark'; }
+      if (theme === 'light') {
+        html.classList.remove('dark');
+        html.classList.add('light');
+        document.body.style.background = '#f1f5f9';
+        document.body.style.color = '#1a202c';
+        document.documentElement.style.setProperty('--overlay-opacity', '0.2');
+        icon.textContent = '◯';
+        label.textContent = 'Light';
+        // Light theme text colors
+        document.querySelectorAll('.text-muted').forEach(el => el.style.color = '#4b5563');
+        document.querySelectorAll('.text-text').forEach(el => el.style.color = '#1a202c');
+      } else {
+        html.classList.remove('light');
+        html.classList.add('dark');
+        document.body.style.background = '';
+        document.body.style.color = '';
+        document.documentElement.style.setProperty('--overlay-opacity', '0.6');
+        icon.textContent = '🌙';
+        label.textContent = 'Dark';
+        // Reset to dark theme colors
+        document.querySelectorAll('.text-muted').forEach(el => el.style.color = '');
+        document.querySelectorAll('.text-text').forEach(el => el.style.color = '');
+      }
     }
     function setupThemeToggle() {
       const btn = document.getElementById('theme-toggle'); const stored = localStorage.getItem('league-theme'); applyTheme(stored === 'light' ? 'light' : 'dark');
